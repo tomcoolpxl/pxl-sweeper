@@ -107,5 +107,126 @@ class Board {
     }
 }
 
-// Initial initialization for Phase 2 Verification
-console.log("PXL Sweeper: Phase 2 Loaded.");
+class Game {
+    constructor() {
+        this.board = null;
+        this.gameStarted = false;
+        this.difficulty = DIFFICULTIES.BEGINNER;
+        
+        this.init();
+    }
+
+    /**
+     * Initialize event listeners and start the first game
+     */
+    init() {
+        document.getElementById('btn-beginner').addEventListener('click', () => this.newGame(DIFFICULTIES.BEGINNER));
+        document.getElementById('btn-intermediate').addEventListener('click', () => this.newGame(DIFFICULTIES.INTERMEDIATE));
+        document.getElementById('btn-expert').addEventListener('click', () => this.newGame(DIFFICULTIES.EXPERT));
+        document.getElementById('restart-btn').addEventListener('click', () => this.newGame(this.difficulty));
+
+        const container = document.getElementById('board-container');
+        container.addEventListener('click', (e) => {
+            const cell = e.target.closest('.cell');
+            if (cell) {
+                const index = parseInt(cell.dataset.index);
+                this.handleCellClick(index);
+            }
+        });
+
+        // Initial game
+        this.newGame(DIFFICULTIES.BEGINNER);
+    }
+
+    /**
+     * Reset the board and UI for a new game
+     */
+    newGame(difficulty) {
+        this.difficulty = difficulty;
+        this.board = new Board(difficulty);
+        this.gameStarted = false;
+        
+        // Update HUD (basic mine count for now)
+        document.getElementById('mine-count-display').textContent = String(this.difficulty.mines).padStart(3, '0');
+        document.getElementById('timer-display').textContent = '000';
+
+        this.render();
+    }
+
+    /**
+     * Generate the grid in the DOM
+     */
+    render() {
+        const container = document.getElementById('board-container');
+        container.innerHTML = '';
+        
+        // Update CSS variables for grid dimensions
+        container.style.setProperty('--grid-cols', this.board.cols);
+        container.style.setProperty('--grid-rows', this.board.rows);
+
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < this.board.grid.length; i++) {
+            const cellDiv = document.createElement('div');
+            cellDiv.classList.add('cell');
+            cellDiv.dataset.index = i;
+            fragment.appendChild(cellDiv);
+        }
+        container.appendChild(fragment);
+    }
+
+    /**
+     * Handle left-click reveal
+     */
+    handleCellClick(index) {
+        const cell = this.board.grid[index];
+
+        // Redundant click check
+        if (cell.isRevealed || cell.isFlagged) return;
+
+        // First click safety: place mines after first click
+        if (!this.gameStarted) {
+            this.board.placeMines(index);
+            this.gameStarted = true;
+            this.board.debug(); // For verification
+        }
+
+        this.revealCell(index);
+    }
+
+    /**
+     * Mark cell as revealed and update UI
+     */
+    revealCell(index) {
+        const cell = this.board.grid[index];
+        cell.isRevealed = true;
+        this.updateCellUI(index);
+    }
+
+    /**
+     * Update a single cell's visual state
+     */
+    updateCellUI(index) {
+        const cell = this.board.grid[index];
+        const container = document.getElementById('board-container');
+        const cellDiv = container.querySelector(`[data-index="${index}"]`);
+
+        if (!cellDiv) return;
+
+        if (cell.isRevealed) {
+            cellDiv.classList.add('revealed');
+            
+            if (cell.isMine) {
+                cellDiv.classList.add('mine');
+                cellDiv.textContent = '💣';
+            } else if (cell.neighborMines > 0) {
+                cellDiv.textContent = cell.neighborMines;
+                cellDiv.classList.add(`n${cell.neighborMines}`);
+            }
+        }
+    }
+}
+
+// Start the game engine
+window.addEventListener('DOMContentLoaded', () => {
+    window.game = new Game();
+});

@@ -12,9 +12,9 @@
 - [x] Implement Adjacency count calculation logic
 
 ## Phase 3: Board Rendering and Basic Reveal
-- [ ] Implement DOM generation for the grid
-- [ ] Implement left-click reveal handler
-- [ ] Map revealed cell state to visual display (numbers 1-8)
+- [x] Implement DOM generation for the grid
+- [x] Implement left-click reveal handler
+- [x] Map revealed cell state to visual display (numbers 1-8)
 
 ## Phase 4: Win/Loss State Transitions
 - [ ] Implement Game State manager

@@ -129,4 +129,18 @@ main {
     background-color: var(--cell-color);
     border: 1px solid var(--cell-border);
     cursor: default;
+    filter: none;
 }
+
+.cell.revealed.mine {
+    background-color: #e74c3c;
+}
+
+.n1 { color: #2980b9; } /* Blue */
+.n2 { color: #27ae60; } /* Green */
+.n3 { color: #c0392b; } /* Red */
+.n4 { color: #8e44ad; } /* Purple */
+.n5 { color: #7f8c8d; } /* Gray/Maroon */
+.n6 { color: #16a085; } /* Turquoise */
+.n7 { color: #2c3e50; } /* Black */
+.n8 { color: #34495e; } /* Slate */
