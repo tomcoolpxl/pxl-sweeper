@@ -6,10 +6,10 @@
 - [x] Verify page loads in Chromium with correct initial layout
 
 ## Phase 2: Game Engine Foundations
-- [ ] Define Difficulty presets in `app.js`
-- [ ] Implement `Board` class/logic for grid generation
-- [ ] Implement Mine placement logic
-- [ ] Implement Adjacency count calculation logic
+- [x] Define Difficulty presets in `app.js`
+- [x] Implement `Board` class/logic for grid generation
+- [x] Implement Mine placement logic
+- [x] Implement Adjacency count calculation logic
 
 ## Phase 3: Board Rendering and Basic Reveal
 - [ ] Implement DOM generation for the grid
