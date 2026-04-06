@@ -1,5 +1,8 @@
 // app.js - PXL Sweeper Engine
 
+/** @type {boolean} Enables console debugging if '?debug' is in the URL */
+const DEBUG_MODE = window.location.search.includes('debug');
+
 const DIFFICULTIES = {
     BEGINNER: { rows: 9, cols: 9, mines: 10 },
     INTERMEDIATE: { rows: 16, cols: 16, mines: 40 },
@@ -13,6 +16,9 @@ const GAME_STATES = {
     LOST: 'LOST'
 };
 
+/**
+ * Represents a single cell on the Minesweeper board.
+ */
 class Cell {
     constructor() {
         this.isMine = false;
@@ -23,7 +29,13 @@ class Cell {
     }
 }
 
+/**
+ * Handles the logic for the game board, including mine placement and adjacency calculations.
+ */
 class Board {
+    /**
+     * @param {Object} config - Difficulty configuration (rows, cols, mines).
+     */
     constructor(config) {
         this.rows = config.rows;
         this.cols = config.cols;
@@ -33,15 +45,15 @@ class Board {
     }
 
     /**
-     * Initialize a grid of empty cells
+     * Initializes a grid of empty cells.
      */
     init() {
         this.grid = Array.from({ length: this.rows * this.cols }, () => new Cell());
     }
 
     /**
-     * Randomly place mines on the grid
-     * @param {number} excludeIndex - Index to exclude from mine placement (for first-click safety)
+     * Randomly places mines on the grid, ensuring the first click is safe.
+     * @param {number} excludeIndex - Index to exclude from mine placement.
      */
     placeMines(excludeIndex = -1) {
         let placedMines = 0;
@@ -54,10 +66,14 @@ class Board {
             }
         }
         this.calculateAdjacency();
+        
+        if (DEBUG_MODE) {
+            this.debug();
+        }
     }
 
     /**
-     * Calculate neighbor mine counts for each cell
+     * Calculates the number of neighboring mines for each non-mine cell.
      */
     calculateAdjacency() {
         for (let i = 0; i < this.grid.length; i++) {
@@ -69,9 +85,9 @@ class Board {
     }
 
     /**
-     * Helper to get neighbor indices for a given index
-     * @param {number} index - Index of the cell
-     * @returns {number[]} Array of neighbor indices
+     * Helper to get neighbor indices for a given cell index.
+     * @param {number} index - Index of the cell.
+     * @returns {number[]} Array of neighbor indices.
      */
     getNeighborsByIndex(index) {
         const row = Math.floor(index / this.cols);
@@ -94,10 +110,12 @@ class Board {
     }
 
     /**
-     * Print a visual representation of the board to the console
+     * Prints a visual representation of the board to the console for debugging.
      */
     debug() {
-        let output = "";
+        if (!DEBUG_MODE) return;
+        
+        let output = "PXL SWEEPER DEBUG BOARD:\n";
         for (let r = 0; r < this.rows; r++) {
             let rowText = "";
             for (let c = 0; c < this.cols; c++) {
@@ -114,6 +132,9 @@ class Board {
     }
 }
 
+/**
+ * Main game controller that synchronizes the engine state with the DOM.
+ */
 class Game {
     constructor() {
         this.board = null;
@@ -121,12 +142,13 @@ class Game {
         this.difficulty = DIFFICULTIES.BEGINNER;
         this.secondsElapsed = 0;
         this.timerInterval = null;
+        this.triggeredMineIndex = -1;
         
         this.init();
     }
 
     /**
-     * Initialize event listeners and start the first game
+     * Sets up global event listeners and starts the initial game.
      */
     init() {
         document.getElementById('btn-beginner').addEventListener('click', () => this.newGame(DIFFICULTIES.BEGINNER));
@@ -136,7 +158,7 @@ class Game {
 
         const container = document.getElementById('board-container');
         
-        // Left-click reveal
+        // Left-click reveal handler
         container.addEventListener('click', (e) => {
             const cell = e.target.closest('.cell');
             if (cell) {
@@ -145,7 +167,7 @@ class Game {
             }
         });
 
-        // Right-click marking
+        // Right-click marking handler
         container.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             const cell = e.target.closest('.cell');
@@ -155,12 +177,13 @@ class Game {
             }
         });
 
-        // Initial game
+        // Initial Beginner game
         this.newGame(DIFFICULTIES.BEGINNER);
     }
 
     /**
-     * Reset the board and UI for a new game
+     * Resets the game state and UI for a new match.
+     * @param {Object} difficulty - The difficulty settings to apply.
      */
     newGame(difficulty) {
         this.stopTimer();
@@ -168,8 +191,8 @@ class Game {
         this.board = new Board(difficulty);
         this.state = GAME_STATES.NOT_STARTED;
         this.secondsElapsed = 0;
+        this.triggeredMineIndex = -1;
         
-        // Update HUD
         this.updateMineCounterUI();
         this.updateTimerUI();
         document.getElementById('restart-btn').textContent = '😊';
@@ -179,7 +202,8 @@ class Game {
     }
 
     /**
-     * Update game status display message
+     * Updates the status message displayed above the board.
+     * @param {string} message - The message to display.
      */
     updateStatusUI(message = '') {
         const statusEl = document.getElementById('game-status');
@@ -196,13 +220,12 @@ class Game {
     }
 
     /**
-     * Generate the grid in the DOM
+     * Renders the game board in the DOM using CSS Grid.
      */
     render() {
         const container = document.getElementById('board-container');
         container.innerHTML = '';
         
-        // Update CSS variables for grid dimensions
         container.style.setProperty('--grid-cols', this.board.cols);
         container.style.setProperty('--grid-rows', this.board.rows);
 
@@ -217,18 +240,17 @@ class Game {
     }
 
     /**
-     * Handle left-click reveal
+     * Handles left-click reveal logic.
+     * @param {number} index - Index of the clicked cell.
      */
     handleCellClick(index) {
-        // Prevent clicks if game ended
         if (this.state === GAME_STATES.WON || this.state === GAME_STATES.LOST) return;
 
         const cell = this.board.grid[index];
 
-        // Redundant click check
         if (cell.isRevealed || cell.isFlagged) return;
 
-        // First click safety: place mines after first click
+        // Lazy mine placement for first-click safety
         if (this.state === GAME_STATES.NOT_STARTED) {
             this.board.placeMines(index);
             this.state = GAME_STATES.IN_PROGRESS;
@@ -239,7 +261,8 @@ class Game {
     }
 
     /**
-     * Handle right-click marking
+     * Handles right-click marking logic.
+     * @param {number} index - Index of the clicked cell.
      */
     handleCellRightClick(index) {
         if (this.state === GAME_STATES.WON || this.state === GAME_STATES.LOST) return;
@@ -247,7 +270,8 @@ class Game {
     }
 
     /**
-     * Toggle flag/question mark state
+     * Toggles between unmarked, flagged, and question-marked states.
+     * @param {number} index - Index of the cell.
      */
     toggleMark(index) {
         const cell = this.board.grid[index];
@@ -267,13 +291,12 @@ class Game {
     }
 
     /**
-     * Update the mine counter in HUD
+     * Updates the mine counter HUD based on flag count.
      */
     updateMineCounterUI() {
         const flaggedCount = this.board.grid.filter(c => c.isFlagged).length;
         const remaining = this.board.mineCount - flaggedCount;
         
-        // Format with sign and padding (e.g. -01, 009, 099)
         const sign = remaining < 0 ? '-' : '';
         const absVal = Math.abs(remaining);
         const displayVal = sign + String(absVal).padStart(sign ? 2 : 3, '0');
@@ -282,7 +305,7 @@ class Game {
     }
 
     /**
-     * Timer logic
+     * Starts the game timer.
      */
     startTimer() {
         if (this.timerInterval) return;
@@ -294,6 +317,9 @@ class Game {
         }, 1000);
     }
 
+    /**
+     * Stops the game timer.
+     */
     stopTimer() {
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
@@ -301,12 +327,16 @@ class Game {
         }
     }
 
+    /**
+     * Updates the timer display in the HUD.
+     */
     updateTimerUI() {
         document.getElementById('timer-display').textContent = String(this.secondsElapsed).padStart(3, '0');
     }
 
     /**
-     * Mark cell as revealed and update UI (with zero-expansion)
+     * Reveals a cell and its neighbors if it has zero adjacent mines.
+     * @param {number} startIndex - Starting cell index.
      */
     revealCell(startIndex) {
         const stack = [startIndex];
@@ -324,10 +354,9 @@ class Game {
 
             if (cell.isMine) {
                 this.handleLoss(index);
-                return; // Stop expansion on mine (though expansion should never hit a mine)
+                return;
             }
 
-            // If it's a zero-adjacent cell, expand to neighbors
             if (cell.neighborMines === 0) {
                 const neighbors = this.board.getNeighborsByIndex(index);
                 for (const neighborIdx of neighbors) {
@@ -342,7 +371,8 @@ class Game {
     }
 
     /**
-     * Handle loss: reveal all mines and update UI
+     * Handles game loss, revealing all mines and identifying mistakes.
+     * @param {number} triggeredIdx - The index of the mine that was clicked.
      */
     handleLoss(triggeredIdx) {
         this.state = GAME_STATES.LOST;
@@ -351,14 +381,13 @@ class Game {
         document.getElementById('restart-btn').textContent = '😵';
         this.updateStatusUI('GAME OVER');
 
-        // Iterate through all cells to update terminal states (reveal all mines/wrong flags)
         this.board.grid.forEach((_, idx) => {
             this.updateCellUI(idx);
         });
     }
 
     /**
-     * Check if all non-mine cells are revealed
+     * Checks if the win condition has been met (all non-mine cells revealed).
      */
     checkWinCondition() {
         const totalNonMines = this.board.grid.length - this.board.mineCount;
@@ -370,7 +399,7 @@ class Game {
     }
 
     /**
-     * Handle win: update UI and auto-flag mines
+     * Handles game win, updating UI and auto-flagging remaining mines.
      */
     handleWin() {
         this.state = GAME_STATES.WON;
@@ -378,7 +407,6 @@ class Game {
         document.getElementById('restart-btn').textContent = '😎';
         this.updateStatusUI('YOU WIN!');
 
-        // Auto-flag all remaining mines for a completed look
         this.board.grid.forEach((cell, idx) => {
             if (cell.isMine && !cell.isFlagged) {
                 cell.isFlagged = true;
@@ -389,7 +417,8 @@ class Game {
     }
 
     /**
-     * Update a single cell's visual state
+     * Updates the visual representation of a single cell in the DOM.
+     * @param {number} index - Index of the cell to update.
      */
     updateCellUI(index) {
         const cell = this.board.grid[index];
@@ -398,7 +427,6 @@ class Game {
 
         if (!cellDiv) return;
 
-        // Reset visual state
         cellDiv.className = 'cell';
         cellDiv.textContent = '';
 
@@ -422,7 +450,6 @@ class Game {
                 cellDiv.textContent = '?';
             }
         } else {
-            // Normal or Win state
             if (cell.isRevealed) {
                 this.applyRevealedState(cell, cellDiv);
             } else if (cell.isFlagged) {
@@ -436,7 +463,9 @@ class Game {
     }
 
     /**
-     * Apply revealed styling and content (neighbor counts)
+     * Applies styling for a revealed non-mine cell.
+     * @param {Cell} cell - The cell object.
+     * @param {HTMLElement} cellDiv - The DOM element.
      */
     applyRevealedState(cell, cellDiv) {
         cellDiv.classList.add('revealed');

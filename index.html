@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PXL Sweeper</title>
+    <meta name="description" content="PXL Sweeper - A modern, minimalist Minesweeper clone built with vanilla JavaScript.">
+    <title>PXL Sweeper - Modern Minesweeper</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,20 +12,20 @@
         <header>
             <h1>PXL Sweeper</h1>
             <div id="difficulty-controls">
-                <button id="btn-beginner">Beginner</button>
-                <button id="btn-intermediate">Intermediate</button>
-                <button id="btn-expert">Expert</button>
+                <button id="btn-beginner" aria-label="Start Beginner Game">Beginner</button>
+                <button id="btn-intermediate" aria-label="Start Intermediate Game">Intermediate</button>
+                <button id="btn-expert" aria-label="Start Expert Game">Expert</button>
             </div>
         </header>
 
         <main>
             <div id="hud">
-                <div id="mine-count-display">010</div>
-                <button id="restart-btn">😊</button>
-                <div id="timer-display">000</div>
+                <div id="mine-count-display" title="Mines Remaining">010</div>
+                <button id="restart-btn" aria-label="Restart Game">😊</button>
+                <div id="timer-display" title="Time Elapsed">000</div>
             </div>
-            <div id="game-status"></div>
-            <div id="board-container"></div>
+            <div id="game-status" aria-live="polite"></div>
+            <div id="board-container" role="grid" aria-label="Minesweeper Board"></div>
         </main>
     </div>
     <script src="app.js"></script>
