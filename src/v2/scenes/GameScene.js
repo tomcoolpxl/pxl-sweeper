@@ -25,13 +25,6 @@ export class GameScene extends Phaser.Scene {
         const startX = (width - boardWidth) / 2 + this.tileSize / 2;
         const startY = (height - boardHeight) / 2 + this.tileSize / 2;
 
-        // Create Grid
-        for (let r = 0; r < this.engine.rows; r++) {
-            for (let c = 0; r < this.engine.cols; c++) {
-                // Wait, logic error in loop condition above (r < this.engine.cols) - fixing below
-            }
-        }
-
         this.createBoard(startX, startY);
 
         // Launch UI Scene
