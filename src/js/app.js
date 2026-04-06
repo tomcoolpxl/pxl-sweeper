@@ -3,6 +3,28 @@
 /** @type {boolean} Enables console debugging if '?debug' is in the URL */
 const DEBUG_MODE = window.location.search.includes('debug');
 
+const CONFIG = {
+    SELECTORS: {
+        BOARD_CONTAINER: 'board-container',
+        MINE_COUNT_DISPLAY: 'mine-count-display',
+        TIMER_DISPLAY: 'timer-display',
+        RESTART_BTN: 'restart-btn',
+        GAME_STATUS: 'game-status',
+        BTN_BEGINNER: 'btn-beginner',
+        BTN_INTERMEDIATE: 'btn-intermediate',
+        BTN_EXPERT: 'btn-expert'
+    },
+    EMOJIS: {
+        MINE: '💣',
+        FLAG: '🚩',
+        QUESTION: '?',
+        WRONG_FLAG: '❌',
+        HAPPY: '😊',
+        LOST: '😵',
+        WON: '😎'
+    }
+};
+
 const DIFFICULTIES = {
     BEGINNER: { rows: 9, cols: 9, mines: 10 },
     INTERMEDIATE: { rows: 16, cols: 16, mines: 40 },
@@ -112,21 +134,22 @@ export class Board {
     /**
      * Prints a visual representation of the board to the console for debugging.
      */
+    /* v8 ignore next 21 */
     debug() {
         if (!DEBUG_MODE) return;
         
-        let output = "PXL SWEEPER DEBUG BOARD:\n";
+        let output = 'PXL SWEEPER DEBUG BOARD:\n';
         for (let r = 0; r < this.rows; r++) {
-            let rowText = "";
+            let rowText = '';
             for (let c = 0; c < this.cols; c++) {
                 const cell = this.grid[r * this.cols + c];
                 if (cell.isMine) {
-                    rowText += " * ";
+                    rowText += ' * ';
                 } else {
                     rowText += ` ${cell.neighborMines} `;
                 }
             }
-            output += rowText + "\n";
+            output += rowText + '\n';
         }
         console.log(output);
     }
@@ -151,12 +174,13 @@ export class Game {
      * Sets up global event listeners and starts the initial game.
      */
     init() {
-        document.getElementById('btn-beginner').addEventListener('click', () => this.newGame(DIFFICULTIES.BEGINNER));
-        document.getElementById('btn-intermediate').addEventListener('click', () => this.newGame(DIFFICULTIES.INTERMEDIATE));
-        document.getElementById('btn-expert').addEventListener('click', () => this.newGame(DIFFICULTIES.EXPERT));
-        document.getElementById('restart-btn').addEventListener('click', () => this.newGame(this.difficulty));
+        const { SELECTORS } = CONFIG;
+        document.getElementById(SELECTORS.BTN_BEGINNER).addEventListener('click', () => this.newGame(DIFFICULTIES.BEGINNER));
+        document.getElementById(SELECTORS.BTN_INTERMEDIATE).addEventListener('click', () => this.newGame(DIFFICULTIES.INTERMEDIATE));
+        document.getElementById(SELECTORS.BTN_EXPERT).addEventListener('click', () => this.newGame(DIFFICULTIES.EXPERT));
+        document.getElementById(SELECTORS.RESTART_BTN).addEventListener('click', () => this.newGame(this.difficulty));
 
-        const container = document.getElementById('board-container');
+        const container = document.getElementById(SELECTORS.BOARD_CONTAINER);
         
         // Left-click reveal handler
         container.addEventListener('click', (e) => {
@@ -195,7 +219,7 @@ export class Game {
         
         this.updateMineCounterUI();
         this.updateTimerUI();
-        document.getElementById('restart-btn').textContent = '😊';
+        document.getElementById(CONFIG.SELECTORS.RESTART_BTN).textContent = CONFIG.EMOJIS.HAPPY;
         this.updateStatusUI('');
 
         this.render();
@@ -206,7 +230,7 @@ export class Game {
      * @param {string} message - The message to display.
      */
     updateStatusUI(message = '') {
-        const statusEl = document.getElementById('game-status');
+        const statusEl = document.getElementById(CONFIG.SELECTORS.GAME_STATUS);
         if (!statusEl) return;
         
         statusEl.textContent = message;
@@ -223,7 +247,7 @@ export class Game {
      * Renders the game board in the DOM using CSS Grid.
      */
     render() {
-        const container = document.getElementById('board-container');
+        const container = document.getElementById(CONFIG.SELECTORS.BOARD_CONTAINER);
         container.innerHTML = '';
         
         container.style.setProperty('--grid-cols', this.board.cols);
@@ -301,7 +325,7 @@ export class Game {
         const absVal = Math.abs(remaining);
         const displayVal = sign + String(absVal).padStart(sign ? 2 : 3, '0');
         
-        document.getElementById('mine-count-display').textContent = displayVal;
+        document.getElementById(CONFIG.SELECTORS.MINE_COUNT_DISPLAY).textContent = displayVal;
     }
 
     /**
@@ -331,7 +355,7 @@ export class Game {
      * Updates the timer display in the HUD.
      */
     updateTimerUI() {
-        document.getElementById('timer-display').textContent = String(this.secondsElapsed).padStart(3, '0');
+        document.getElementById(CONFIG.SELECTORS.TIMER_DISPLAY).textContent = String(this.secondsElapsed).padStart(3, '0');
     }
 
     /**
@@ -378,7 +402,7 @@ export class Game {
         this.state = GAME_STATES.LOST;
         this.stopTimer();
         this.triggeredMineIndex = triggeredIdx;
-        document.getElementById('restart-btn').textContent = '😵';
+        document.getElementById(CONFIG.SELECTORS.RESTART_BTN).textContent = CONFIG.EMOJIS.LOST;
         this.updateStatusUI('GAME OVER');
 
         this.board.grid.forEach((_, idx) => {
@@ -404,7 +428,7 @@ export class Game {
     handleWin() {
         this.state = GAME_STATES.WON;
         this.stopTimer();
-        document.getElementById('restart-btn').textContent = '😎';
+        document.getElementById(CONFIG.SELECTORS.RESTART_BTN).textContent = CONFIG.EMOJIS.WON;
         this.updateStatusUI('YOU WIN!');
 
         this.board.grid.forEach((cell, idx) => {
@@ -421,44 +445,56 @@ export class Game {
      * @param {number} index - Index of the cell to update.
      */
     updateCellUI(index) {
-        const cell = this.board.grid[index];
-        const container = document.getElementById('board-container');
+        const container = document.getElementById(CONFIG.SELECTORS.BOARD_CONTAINER);
         const cellDiv = container.querySelector(`[data-index="${index}"]`);
-
         if (!cellDiv) return;
 
+        const cell = this.board.grid[index];
         cellDiv.className = 'cell';
         cellDiv.textContent = '';
 
         if (this.state === GAME_STATES.LOST) {
-            if (cell.isMine) {
-                cellDiv.classList.add('revealed', 'mine');
-                cellDiv.textContent = '💣';
-                if (index === this.triggeredMineIndex) {
-                    cellDiv.classList.add('triggered');
-                }
-            } else if (cell.isFlagged && !cell.isMine) {
-                cellDiv.classList.add('revealed', 'flagged', 'wrong');
-                cellDiv.textContent = '❌'; 
-            } else if (cell.isRevealed) {
-                this.applyRevealedState(cell, cellDiv);
-            } else if (cell.isFlagged) {
-                cellDiv.classList.add('flagged');
-                cellDiv.textContent = '🚩';
-            } else if (cell.isQuestionMarked) {
-                cellDiv.classList.add('question');
-                cellDiv.textContent = '?';
-            }
+            this.renderCellLossState(cell, cellDiv, index);
         } else {
-            if (cell.isRevealed) {
-                this.applyRevealedState(cell, cellDiv);
-            } else if (cell.isFlagged) {
-                cellDiv.classList.add('flagged');
-                cellDiv.textContent = '🚩';
-            } else if (cell.isQuestionMarked) {
-                cellDiv.classList.add('question');
-                cellDiv.textContent = '?';
+            this.renderCellPlayState(cell, cellDiv);
+        }
+    }
+
+    /**
+     * Renders a cell during active gameplay or win state.
+     * @param {Cell} cell - The cell object.
+     * @param {HTMLElement} cellDiv - The DOM element.
+     */
+    renderCellPlayState(cell, cellDiv) {
+        if (cell.isRevealed) {
+            this.applyRevealedState(cell, cellDiv);
+        } else if (cell.isFlagged) {
+            cellDiv.classList.add('flagged');
+            cellDiv.textContent = CONFIG.EMOJIS.FLAG;
+        } else if (cell.isQuestionMarked) {
+            cellDiv.classList.add('question');
+            cellDiv.textContent = CONFIG.EMOJIS.QUESTION;
+        }
+    }
+
+    /**
+     * Renders a cell after the game has been lost.
+     * @param {Cell} cell - The cell object.
+     * @param {HTMLElement} cellDiv - The DOM element.
+     * @param {number} index - The cell index.
+     */
+    renderCellLossState(cell, cellDiv, index) {
+        if (cell.isMine) {
+            cellDiv.classList.add('revealed', 'mine');
+            cellDiv.textContent = CONFIG.EMOJIS.MINE;
+            if (index === this.triggeredMineIndex) {
+                cellDiv.classList.add('triggered');
             }
+        } else if (cell.isFlagged && !cell.isMine) {
+            cellDiv.classList.add('revealed', 'flagged', 'wrong');
+            cellDiv.textContent = CONFIG.EMOJIS.WRONG_FLAG; 
+        } else {
+            this.renderCellPlayState(cell, cellDiv);
         }
     }
 

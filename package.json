@@ -6,12 +6,15 @@
     "start": "serve . -p 8080",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/js/*.js"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^1.6.1",
+    "@vitest/coverage-v8": "^1.4.0",
+    "eslint": "^8.57.0",
     "jsdom": "^24.0.0",
     "serve": "^14.2.4",
     "vitest": "^1.4.0"
   }
-}
+  }
+
