@@ -41,7 +41,7 @@ This project follows senior engineering standards with a focus on automated qual
 - **[Requirements](REQUIREMENTS.md)**: Detailed functional and technical specifications.
 - **[Testing Strategy](TESTING_STRATEGY.md)**: Infrastructure and test map for the Vitest suite.
 - **[CI/CD Strategy](CICD.md)**: Documentation for our automated GitHub Actions pipeline.
-- **[Code Review](CODE_REVIEW.md)**: Architectural audit and quality assessment.
+- **[Code Review](docs/history/CODE_REVIEW.md)**: Architectural audit and quality assessment.
 
 ### Local Development Commands
 ```bash
