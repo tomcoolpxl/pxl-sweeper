@@ -10,6 +10,8 @@ This repository builds the PXL Sweep game.
 - **Comprehensive Coverage**: Maintain and track high code coverage (target >90%). Use `npm run test:coverage` to verify.
 - **Requirement Traceability**: Tests must explicitly cover all functional requirements and acceptance criteria defined in `REQUIREMENTS.md`.
 - **Always Run All Tests**: Both unit and integration tests must be executed and pass before any work is considered complete.
+- **CI/CD Compliance**: All changes MUST pass the local `npm run lint` and `npm test` checks. Continuous Integration failure is considered a project regression.
+- **Production Delivery**: Deployment is strictly managed via GitHub Release tags to ensure immutable and verified production builds.
 - **Environment**: Use Vitest with `jsdom` for all browser-related logic and DOM interaction verification.
 
 ## Project Workflow

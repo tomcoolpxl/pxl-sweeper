@@ -7,7 +7,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint src/js/*.js"
+    "lint": "eslint src/js/*.js",
+    "build": "mkdir -p dist && cp -r src index.html dist/"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^1.4.0",

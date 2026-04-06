@@ -33,3 +33,20 @@ A modern, minimalist Minesweeper clone built with vanilla JavaScript, CSS Grid, 
 ## Compatibility
 
 Optimized for modern Chromium-based desktop browsers (Chrome, Edge, etc.).
+
+## Development & Quality Assurance
+
+This project follows senior engineering standards with a focus on automated quality control and continuous delivery.
+
+- **[Requirements](REQUIREMENTS.md)**: Detailed functional and technical specifications.
+- **[Testing Strategy](TESTING_STRATEGY.md)**: Infrastructure and test map for the Vitest suite.
+- **[CI/CD Strategy](CICD.md)**: Documentation for our automated GitHub Actions pipeline.
+- **[Code Review](CODE_REVIEW.md)**: Architectural audit and quality assessment.
+
+### Local Development Commands
+```bash
+npm install     # Install dev dependencies
+npm start       # Start a local development server
+npm test        # Run all unit and integration tests
+npm run lint    # Check code style with ESLint
+```
