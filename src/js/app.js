@@ -19,7 +19,7 @@ const GAME_STATES = {
 /**
  * Represents a single cell on the Minesweeper board.
  */
-class Cell {
+export class Cell {
     constructor() {
         this.isMine = false;
         this.isRevealed = false;
@@ -32,7 +32,7 @@ class Cell {
 /**
  * Handles the logic for the game board, including mine placement and adjacency calculations.
  */
-class Board {
+export class Board {
     /**
      * @param {Object} config - Difficulty configuration (rows, cols, mines).
      */
@@ -135,7 +135,7 @@ class Board {
 /**
  * Main game controller that synchronizes the engine state with the DOM.
  */
-class Game {
+export class Game {
     constructor() {
         this.board = null;
         this.state = GAME_STATES.NOT_STARTED;
