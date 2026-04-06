@@ -17,10 +17,10 @@
 - [x] Map revealed cell state to visual display (numbers 1-8)
 
 ## Phase 4: Win/Loss State Transitions
-- [ ] Implement Game State manager
-- [ ] Implement Win detection logic
-- [ ] Implement Loss detection logic
-- [ ] Add visual "Win" and "Loss" indicators to the UI
+- [x] Implement Game State manager
+- [x] Implement Win detection logic
+- [x] Implement Loss detection logic
+- [x] Add visual "Win" and "Loss" indicators to the UI
 
 ## Phase 5: Zero Expansion and First-Click Safety
 - [ ] Implement recursive/iterative zero-expansion logic

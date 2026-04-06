@@ -94,6 +94,22 @@ button:hover {
     padding: 5px 10px;
 }
 
+#game-status {
+    margin-bottom: 15px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    min-height: 1.5rem;
+    color: var(--text-color);
+}
+
+#game-status.won {
+    color: #27ae60;
+}
+
+#game-status.lost {
+    color: #c0392b;
+}
+
 main {
     overflow-x: auto;
 }

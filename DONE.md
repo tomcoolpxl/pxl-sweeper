@@ -20,3 +20,10 @@
 - [x] Added first-click safety trigger for mine placement.
 - [x] Mapped neighbor counts to distinct color classes (1-8).
 - [x] Verified rendering for all difficulties (Beginner 9x9, Expert 30x16).
+
+## Phase 4: Win/Loss State Transitions (Completed April 6, 2026)
+- [x] Implemented `GAME_STATES` enum and tracking.
+- [x] Implemented win detection (all non-mine cells revealed).
+- [x] Implemented loss detection (hitting a mine) and revealing all mines.
+- [x] Added visual HUD feedback (emoji buttons and status message).
+- [x] Verified board interaction is blocked after game ends.

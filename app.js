@@ -6,6 +6,13 @@ const DIFFICULTIES = {
     EXPERT: { rows: 30, cols: 16, mines: 99 }
 };
 
+const GAME_STATES = {
+    NOT_STARTED: 'NOT_STARTED',
+    IN_PROGRESS: 'IN_PROGRESS',
+    WON: 'WON',
+    LOST: 'LOST'
+};
+
 class Cell {
     constructor() {
         this.isMine = false;
@@ -110,7 +117,7 @@ class Board {
 class Game {
     constructor() {
         this.board = null;
-        this.gameStarted = false;
+        this.state = GAME_STATES.NOT_STARTED;
         this.difficulty = DIFFICULTIES.BEGINNER;
         
         this.init();
@@ -144,13 +151,32 @@ class Game {
     newGame(difficulty) {
         this.difficulty = difficulty;
         this.board = new Board(difficulty);
-        this.gameStarted = false;
+        this.state = GAME_STATES.NOT_STARTED;
         
         // Update HUD (basic mine count for now)
         document.getElementById('mine-count-display').textContent = String(this.difficulty.mines).padStart(3, '0');
         document.getElementById('timer-display').textContent = '000';
+        document.getElementById('restart-btn').textContent = '😊';
+        this.updateStatusUI('');
 
         this.render();
+    }
+
+    /**
+     * Update game status display message
+     */
+    updateStatusUI(message = '') {
+        const statusEl = document.getElementById('game-status');
+        if (!statusEl) return;
+        
+        statusEl.textContent = message;
+        statusEl.className = ''; // Reset classes
+        
+        if (this.state === GAME_STATES.WON) {
+            statusEl.classList.add('won');
+        } else if (this.state === GAME_STATES.LOST) {
+            statusEl.classList.add('lost');
+        }
     }
 
     /**
@@ -178,15 +204,18 @@ class Game {
      * Handle left-click reveal
      */
     handleCellClick(index) {
+        // Prevent clicks if game ended
+        if (this.state === GAME_STATES.WON || this.state === GAME_STATES.LOST) return;
+
         const cell = this.board.grid[index];
 
         // Redundant click check
         if (cell.isRevealed || cell.isFlagged) return;
 
         // First click safety: place mines after first click
-        if (!this.gameStarted) {
+        if (this.state === GAME_STATES.NOT_STARTED) {
             this.board.placeMines(index);
-            this.gameStarted = true;
+            this.state = GAME_STATES.IN_PROGRESS;
             this.board.debug(); // For verification
         }
 
@@ -200,6 +229,50 @@ class Game {
         const cell = this.board.grid[index];
         cell.isRevealed = true;
         this.updateCellUI(index);
+
+        if (cell.isMine) {
+            this.handleLoss(index);
+        } else {
+            this.checkWinCondition();
+        }
+    }
+
+    /**
+     * Handle loss: reveal all mines and update UI
+     */
+    handleLoss(triggeredIdx) {
+        this.state = GAME_STATES.LOST;
+        document.getElementById('restart-btn').textContent = '😵';
+        this.updateStatusUI('GAME OVER');
+
+        // Reveal all other mines
+        this.board.grid.forEach((cell, idx) => {
+            if (cell.isMine && !cell.isRevealed) {
+                cell.isRevealed = true;
+                this.updateCellUI(idx);
+            }
+        });
+    }
+
+    /**
+     * Check if all non-mine cells are revealed
+     */
+    checkWinCondition() {
+        const totalNonMines = this.board.grid.length - this.board.mineCount;
+        const revealedNonMines = this.board.grid.filter(c => c.isRevealed && !c.isMine).length;
+
+        if (revealedNonMines === totalNonMines) {
+            this.handleWin();
+        }
+    }
+
+    /**
+     * Handle win: update UI
+     */
+    handleWin() {
+        this.state = GAME_STATES.WON;
+        document.getElementById('restart-btn').textContent = '😎';
+        this.updateStatusUI('YOU WIN!');
     }
 
     /**
