@@ -57,7 +57,7 @@ The initial version shall support exactly these difficulty presets:
 
 * Beginner: 9 x 9 grid with 10 mines
 * Intermediate: 16 x 16 grid with 40 mines
-* Expert: 30 x 16 grid with 99 mines
+* Expert: 16 x 30 grid with 99 mines
 
 The player shall be able to start a new game using any of these presets.
 

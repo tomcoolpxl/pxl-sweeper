@@ -33,11 +33,11 @@ describe('Requirements Coverage', () => {
         expect(game.board.grid.length).toBe(256);
     });
 
-    it('should support Expert difficulty preset (30x16, 99 mines)', () => {
+    it('should support Expert difficulty preset (16x30, 99 mines)', () => {
         const btn = document.getElementById('btn-expert');
         btn.click();
-        expect(game.difficulty.rows).toBe(30);
-        expect(game.difficulty.cols).toBe(16);
+        expect(game.difficulty.rows).toBe(16);
+        expect(game.difficulty.cols).toBe(30);
         expect(game.board.mineCount).toBe(99);
         expect(game.board.grid.length).toBe(480);
     });

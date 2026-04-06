@@ -71,3 +71,9 @@
 - [x] Integrated **ESLint** for automated linting and style enforcement.
 - [x] Optimized code coverage by excluding debug utilities (reached 99% logic coverage).
 
+## Phase 11: Layout Optimization (Landscape Mode) (Completed April 6, 2026)
+- [x] Swapped Expert difficulty dimensions from portrait (30x16) to landscape (16x30).
+- [x] Updated `REQUIREMENTS.md` to reflect the new Expert preset (16x30).
+- [x] Adjusted integration tests to verify the 16x30 grid configuration.
+- [x] Verified that all tests pass with the new layout.
+
