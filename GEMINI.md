@@ -11,3 +11,5 @@ This repository builds the PXL Sweep game.
 - Refresh `TODO.md` from the current plan phase.
 - Update `TODO.md` and `DONE.md` after implementation.
 - When `DONE.md` exists, it holds only verified work.
+- Make sure to use the package.json pattern to run/test/ etc
+- adapt this file at the end of each implementation round!
