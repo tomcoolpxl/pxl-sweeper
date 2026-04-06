@@ -34,10 +34,10 @@
 - [x] Implement real-time Mine Counter logic
 
 ## Phase 7: Enhanced Loss Visualization and Polish
-- [ ] Implement "reveal all mines" on loss
-- [ ] Add distinct styling for the triggering mine
-- [ ] Add distinct styling for incorrect flags on loss
-- [ ] Finalize CSS theme (colors, spacing, typography)
+- [x] Implement "reveal all mines" on loss
+- [x] Add distinct styling for the triggering mine
+- [x] Add distinct styling for incorrect flags on loss
+- [x] Finalize CSS theme (colors, spacing, typography)
 
 ## Phase 8: Final Stabilization and Review
 - [ ] Perform final smoke tests on all difficulty levels

@@ -41,3 +41,11 @@
 - [x] Implemented real-time Mine Counter (Total Mines - Flags) with support for negative values.
 - [x] Verified that flagged cells cannot be revealed by left-clicks.
 
+## Phase 7: Enhanced Loss Visualization and Polish (Completed April 6, 2026)
+- [x] Implemented "reveal all mines" on loss with distinct styling.
+- [x] Added triggered mine highlighting with pulse animation.
+- [x] Implemented incorrect flag marking (❌) on loss.
+- [x] Added auto-flagging of remaining mines on win.
+- [x] Refined CSS theme with animations, better button states, and HUD shadows.
+- [x] Verified terminal state transitions and board locking.
+

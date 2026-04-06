@@ -347,15 +347,13 @@ class Game {
     handleLoss(triggeredIdx) {
         this.state = GAME_STATES.LOST;
         this.stopTimer();
+        this.triggeredMineIndex = triggeredIdx;
         document.getElementById('restart-btn').textContent = '😵';
         this.updateStatusUI('GAME OVER');
 
-        // Reveal all other mines
-        this.board.grid.forEach((cell, idx) => {
-            if (cell.isMine && !cell.isRevealed) {
-                cell.isRevealed = true;
-                this.updateCellUI(idx);
-            }
+        // Iterate through all cells to update terminal states (reveal all mines/wrong flags)
+        this.board.grid.forEach((_, idx) => {
+            this.updateCellUI(idx);
         });
     }
 
@@ -372,13 +370,22 @@ class Game {
     }
 
     /**
-     * Handle win: update UI
+     * Handle win: update UI and auto-flag mines
      */
     handleWin() {
         this.state = GAME_STATES.WON;
         this.stopTimer();
         document.getElementById('restart-btn').textContent = '😎';
         this.updateStatusUI('YOU WIN!');
+
+        // Auto-flag all remaining mines for a completed look
+        this.board.grid.forEach((cell, idx) => {
+            if (cell.isMine && !cell.isFlagged) {
+                cell.isFlagged = true;
+                this.updateCellUI(idx);
+            }
+        });
+        this.updateMineCounterUI();
     }
 
     /**
@@ -391,26 +398,51 @@ class Game {
 
         if (!cellDiv) return;
 
-        // Clear visual states
-        cellDiv.classList.remove('flagged', 'question');
+        // Reset visual state
+        cellDiv.className = 'cell';
         cellDiv.textContent = '';
 
-        if (cell.isRevealed) {
-            cellDiv.classList.add('revealed');
-            
+        if (this.state === GAME_STATES.LOST) {
             if (cell.isMine) {
-                cellDiv.classList.add('mine');
+                cellDiv.classList.add('revealed', 'mine');
                 cellDiv.textContent = '💣';
-            } else if (cell.neighborMines > 0) {
-                cellDiv.textContent = cell.neighborMines;
-                cellDiv.classList.add(`n${cell.neighborMines}`);
+                if (index === this.triggeredMineIndex) {
+                    cellDiv.classList.add('triggered');
+                }
+            } else if (cell.isFlagged && !cell.isMine) {
+                cellDiv.classList.add('revealed', 'flagged', 'wrong');
+                cellDiv.textContent = '❌'; 
+            } else if (cell.isRevealed) {
+                this.applyRevealedState(cell, cellDiv);
+            } else if (cell.isFlagged) {
+                cellDiv.classList.add('flagged');
+                cellDiv.textContent = '🚩';
+            } else if (cell.isQuestionMarked) {
+                cellDiv.classList.add('question');
+                cellDiv.textContent = '?';
             }
-        } else if (cell.isFlagged) {
-            cellDiv.classList.add('flagged');
-            cellDiv.textContent = '🚩';
-        } else if (cell.isQuestionMarked) {
-            cellDiv.classList.add('question');
-            cellDiv.textContent = '?';
+        } else {
+            // Normal or Win state
+            if (cell.isRevealed) {
+                this.applyRevealedState(cell, cellDiv);
+            } else if (cell.isFlagged) {
+                cellDiv.classList.add('flagged');
+                cellDiv.textContent = '🚩';
+            } else if (cell.isQuestionMarked) {
+                cellDiv.classList.add('question');
+                cellDiv.textContent = '?';
+            }
+        }
+    }
+
+    /**
+     * Apply revealed styling and content (neighbor counts)
+     */
+    applyRevealedState(cell, cellDiv) {
+        cellDiv.classList.add('revealed');
+        if (cell.neighborMines > 0) {
+            cellDiv.textContent = cell.neighborMines;
+            cellDiv.classList.add(`n${cell.neighborMines}`);
         }
     }
 }
