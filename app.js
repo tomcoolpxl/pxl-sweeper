@@ -119,6 +119,8 @@ class Game {
         this.board = null;
         this.state = GAME_STATES.NOT_STARTED;
         this.difficulty = DIFFICULTIES.BEGINNER;
+        this.secondsElapsed = 0;
+        this.timerInterval = null;
         
         this.init();
     }
@@ -133,11 +135,23 @@ class Game {
         document.getElementById('restart-btn').addEventListener('click', () => this.newGame(this.difficulty));
 
         const container = document.getElementById('board-container');
+        
+        // Left-click reveal
         container.addEventListener('click', (e) => {
             const cell = e.target.closest('.cell');
             if (cell) {
                 const index = parseInt(cell.dataset.index);
                 this.handleCellClick(index);
+            }
+        });
+
+        // Right-click marking
+        container.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const cell = e.target.closest('.cell');
+            if (cell) {
+                const index = parseInt(cell.dataset.index);
+                this.handleCellRightClick(index);
             }
         });
 
@@ -149,13 +163,15 @@ class Game {
      * Reset the board and UI for a new game
      */
     newGame(difficulty) {
+        this.stopTimer();
         this.difficulty = difficulty;
         this.board = new Board(difficulty);
         this.state = GAME_STATES.NOT_STARTED;
+        this.secondsElapsed = 0;
         
-        // Update HUD (basic mine count for now)
-        document.getElementById('mine-count-display').textContent = String(this.difficulty.mines).padStart(3, '0');
-        document.getElementById('timer-display').textContent = '000';
+        // Update HUD
+        this.updateMineCounterUI();
+        this.updateTimerUI();
         document.getElementById('restart-btn').textContent = '😊';
         this.updateStatusUI('');
 
@@ -216,9 +232,77 @@ class Game {
         if (this.state === GAME_STATES.NOT_STARTED) {
             this.board.placeMines(index);
             this.state = GAME_STATES.IN_PROGRESS;
+            this.startTimer();
         }
 
         this.revealCell(index);
+    }
+
+    /**
+     * Handle right-click marking
+     */
+    handleCellRightClick(index) {
+        if (this.state === GAME_STATES.WON || this.state === GAME_STATES.LOST) return;
+        this.toggleMark(index);
+    }
+
+    /**
+     * Toggle flag/question mark state
+     */
+    toggleMark(index) {
+        const cell = this.board.grid[index];
+        if (cell.isRevealed) return;
+
+        if (!cell.isFlagged && !cell.isQuestionMarked) {
+            cell.isFlagged = true;
+        } else if (cell.isFlagged) {
+            cell.isFlagged = false;
+            cell.isQuestionMarked = true;
+        } else {
+            cell.isQuestionMarked = false;
+        }
+
+        this.updateCellUI(index);
+        this.updateMineCounterUI();
+    }
+
+    /**
+     * Update the mine counter in HUD
+     */
+    updateMineCounterUI() {
+        const flaggedCount = this.board.grid.filter(c => c.isFlagged).length;
+        const remaining = this.board.mineCount - flaggedCount;
+        
+        // Format with sign and padding (e.g. -01, 009, 099)
+        const sign = remaining < 0 ? '-' : '';
+        const absVal = Math.abs(remaining);
+        const displayVal = sign + String(absVal).padStart(sign ? 2 : 3, '0');
+        
+        document.getElementById('mine-count-display').textContent = displayVal;
+    }
+
+    /**
+     * Timer logic
+     */
+    startTimer() {
+        if (this.timerInterval) return;
+        this.timerInterval = setInterval(() => {
+            if (this.secondsElapsed < 999) {
+                this.secondsElapsed++;
+                this.updateTimerUI();
+            }
+        }, 1000);
+    }
+
+    stopTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
+
+    updateTimerUI() {
+        document.getElementById('timer-display').textContent = String(this.secondsElapsed).padStart(3, '0');
     }
 
     /**
@@ -262,6 +346,7 @@ class Game {
      */
     handleLoss(triggeredIdx) {
         this.state = GAME_STATES.LOST;
+        this.stopTimer();
         document.getElementById('restart-btn').textContent = '😵';
         this.updateStatusUI('GAME OVER');
 
@@ -291,6 +376,7 @@ class Game {
      */
     handleWin() {
         this.state = GAME_STATES.WON;
+        this.stopTimer();
         document.getElementById('restart-btn').textContent = '😎';
         this.updateStatusUI('YOU WIN!');
     }
@@ -305,6 +391,10 @@ class Game {
 
         if (!cellDiv) return;
 
+        // Clear visual states
+        cellDiv.classList.remove('flagged', 'question');
+        cellDiv.textContent = '';
+
         if (cell.isRevealed) {
             cellDiv.classList.add('revealed');
             
@@ -315,6 +405,12 @@ class Game {
                 cellDiv.textContent = cell.neighborMines;
                 cellDiv.classList.add(`n${cell.neighborMines}`);
             }
+        } else if (cell.isFlagged) {
+            cellDiv.classList.add('flagged');
+            cellDiv.textContent = '🚩';
+        } else if (cell.isQuestionMarked) {
+            cellDiv.classList.add('question');
+            cellDiv.textContent = '?';
         }
     }
 }

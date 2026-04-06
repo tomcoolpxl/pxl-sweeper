@@ -33,3 +33,11 @@
 - [x] Ensured first-click safety via lazy mine placement with exclusion.
 - [x] Verified expansion logic correctly reveals islands of empty cells and stops at boundaries.
 - [x] Verified win condition is checked after the full expansion is complete.
+
+## Phase 6: Marking Logic and HUD Elements (Completed April 6, 2026)
+- [x] Disabled default context menu on the board container.
+- [x] Implemented three-state marking cycle: Unmarked -> Flag (🚩) -> Question Mark (?) -> Unmarked.
+- [x] Implemented dynamic Timer starting on first reveal and stopping on game end.
+- [x] Implemented real-time Mine Counter (Total Mines - Flags) with support for negative values.
+- [x] Verified that flagged cells cannot be revealed by left-clicks.
+

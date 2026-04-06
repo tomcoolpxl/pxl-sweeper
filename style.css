@@ -152,6 +152,14 @@ main {
     background-color: #e74c3c;
 }
 
+.cell.flagged {
+    color: #e74c3c;
+}
+
+.cell.question {
+    color: #2c3e50;
+}
+
 .n1 { color: #2980b9; } /* Blue */
 .n2 { color: #27ae60; } /* Green */
 .n3 { color: #c0392b; } /* Red */

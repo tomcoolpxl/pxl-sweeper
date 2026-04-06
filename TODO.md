@@ -28,10 +28,10 @@
 - [x] Verify expansion logic matches classic Minesweeper rules
 
 ## Phase 6: Marking Logic and HUD Elements
-- [ ] Disable context menu on the board
-- [ ] Implement right-click flagging/question-mark cycle
-- [ ] Implement active Timer logic
-- [ ] Implement real-time Mine Counter logic
+- [x] Disable context menu on the board
+- [x] Implement right-click flagging/question-mark cycle
+- [x] Implement active Timer logic
+- [x] Implement real-time Mine Counter logic
 
 ## Phase 7: Enhanced Loss Visualization and Polish
 - [ ] Implement "reveal all mines" on loss
