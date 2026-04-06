@@ -216,25 +216,45 @@ class Game {
         if (this.state === GAME_STATES.NOT_STARTED) {
             this.board.placeMines(index);
             this.state = GAME_STATES.IN_PROGRESS;
-            this.board.debug(); // For verification
         }
 
         this.revealCell(index);
     }
 
     /**
-     * Mark cell as revealed and update UI
+     * Mark cell as revealed and update UI (with zero-expansion)
      */
-    revealCell(index) {
-        const cell = this.board.grid[index];
-        cell.isRevealed = true;
-        this.updateCellUI(index);
+    revealCell(startIndex) {
+        const stack = [startIndex];
+        const processed = new Set();
 
-        if (cell.isMine) {
-            this.handleLoss(index);
-        } else {
-            this.checkWinCondition();
+        while (stack.length > 0) {
+            const index = stack.pop();
+            const cell = this.board.grid[index];
+
+            if (cell.isRevealed || cell.isFlagged || processed.has(index)) continue;
+
+            cell.isRevealed = true;
+            this.updateCellUI(index);
+            processed.add(index);
+
+            if (cell.isMine) {
+                this.handleLoss(index);
+                return; // Stop expansion on mine (though expansion should never hit a mine)
+            }
+
+            // If it's a zero-adjacent cell, expand to neighbors
+            if (cell.neighborMines === 0) {
+                const neighbors = this.board.getNeighborsByIndex(index);
+                for (const neighborIdx of neighbors) {
+                    if (!this.board.grid[neighborIdx].isRevealed) {
+                        stack.push(neighborIdx);
+                    }
+                }
+            }
         }
+
+        this.checkWinCondition();
     }
 
     /**

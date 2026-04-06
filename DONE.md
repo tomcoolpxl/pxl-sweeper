@@ -27,3 +27,9 @@
 - [x] Implemented loss detection (hitting a mine) and revealing all mines.
 - [x] Added visual HUD feedback (emoji buttons and status message).
 - [x] Verified board interaction is blocked after game ends.
+
+## Phase 5: Zero Expansion and First-Click Safety (Completed April 6, 2026)
+- [x] Implemented iterative stack-based expansion algorithm for zero-adjacent cells.
+- [x] Ensured first-click safety via lazy mine placement with exclusion.
+- [x] Verified expansion logic correctly reveals islands of empty cells and stops at boundaries.
+- [x] Verified win condition is checked after the full expansion is complete.

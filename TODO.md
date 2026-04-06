@@ -23,9 +23,9 @@
 - [x] Add visual "Win" and "Loss" indicators to the UI
 
 ## Phase 5: Zero Expansion and First-Click Safety
-- [ ] Implement recursive/iterative zero-expansion logic
-- [ ] Implement first-click safety (mine relocation)
-- [ ] Verify expansion logic matches classic Minesweeper rules
+- [x] Implement iterative zero-expansion logic
+- [x] Implement first-click safety (lazy placement)
+- [x] Verify expansion logic matches classic Minesweeper rules
 
 ## Phase 6: Marking Logic and HUD Elements
 - [ ] Disable context menu on the board
