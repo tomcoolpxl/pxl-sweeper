@@ -1,9 +1,9 @@
 # TODO
 
 ## Phase 1: Project Shell and Layout
-- [ ] Create `index.html` with HUD (timer, counter, restart) and Board containers
-- [ ] Implement basic CSS for difficulty selection and grid layout
-- [ ] Verify page loads in Chromium with correct initial layout
+- [x] Create `index.html` with HUD (timer, counter, restart) and Board containers
+- [x] Implement basic CSS for difficulty selection and grid layout
+- [x] Verify page loads in Chromium with correct initial layout
 
 ## Phase 2: Game Engine Foundations
 - [ ] Define Difficulty presets in `app.js`
