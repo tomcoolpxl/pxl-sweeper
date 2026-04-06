@@ -1,0 +1,11 @@
+{
+  "name": "pxl-sweeper",
+  "version": "1.0.0",
+  "description": "A modern, high-contrast Minesweeper clone.",
+  "scripts": {
+    "start": "serve . -p 8080"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}
