@@ -3,74 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PXL Sweeper - A modern, minimalist Minesweeper clone built with vanilla JavaScript.">
-    <title>PXL Sweeper - Modern Minesweeper</title>
-    <link rel="stylesheet" href="src/css/style.css">
+    <meta name="description" content="PXL Sweeper V2 - High-fidelity Minesweeper built with Phaser 3.">
+    <title>PXL Sweeper V2 - Modern Minesweeper</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <header>
-            <h1>PXL Sweeper</h1>
-            <div id="difficulty-controls">
-                <button id="btn-beginner" aria-label="Start Beginner Game">Beginner</button>
-                <button id="btn-intermediate" aria-label="Start Intermediate Game">Intermediate</button>
-                <button id="btn-expert" aria-label="Start Expert Game">Expert</button>
-                <button id="btn-instructions" aria-label="Show Instructions">?</button>
-                <button id="btn-highscores" aria-label="Show Highscores">🏆</button>
-            </div>
-        </header>
-
-        <main>
-            <div id="hud">
-                <div id="mine-count-display" title="Mines Remaining">010</div>
-                <button id="restart-btn" aria-label="Restart Game">😊</button>
-                <div id="timer-display" title="Time Elapsed">000</div>
-            </div>
-            <div id="game-status" aria-live="polite"></div>
-            <div id="board-container" role="grid" aria-label="Minesweeper Board"></div>
-        </main>
-
-        <!-- Dialogs -->
-        <dialog id="instructions-modal">
-            <div class="modal-content">
-                <h2>How to Play</h2>
-                <ul>
-                    <li><strong>Left-Click:</strong> Reveal a cell.</li>
-                    <li><strong>Right-Click:</strong> Cycle through Flag (🚩), Question (?), and Unmarked.</li>
-                    <li><strong>Numbers:</strong> Show how many mines are in the 8 adjacent cells.</li>
-                    <li><strong>Safety:</strong> Your first click is always safe from mines!</li>
-                    <li><strong>Win:</strong> Reveal all cells that do not contain mines.</li>
-                </ul>
-                <button class="close-modal">Close</button>
-            </div>
-        </dialog>
-
-        <dialog id="highscores-modal">
-            <div class="modal-content">
-                <h2>Local Highscores</h2>
-                <div id="highscores-list">
-                    <div class="score-row"><span>Beginner:</span> <span id="score-beginner">---</span>s</div>
-                    <div class="score-row"><span>Intermediate:</span> <span id="score-intermediate">---</span>s</div>
-                    <div class="score-row"><span>Expert:</span> <span id="score-expert">---</span>s</div>
-                </div>
-                <div class="modal-actions">
-                    <button id="btn-clear-scores">Clear All</button>
-                    <button class="close-modal">Close</button>
-                </div>
-            </div>
-        </dialog>
-
-        <dialog id="confirm-modal">
-            <div class="modal-content">
-                <h2>Are you sure?</h2>
-                <p id="confirm-message">This action cannot be undone.</p>
-                <div class="modal-actions">
-                    <button id="confirm-yes">Yes, Clear</button>
-                    <button id="confirm-no" class="close-modal">Cancel</button>
-                </div>
-            </div>
-        </dialog>
-    </div>
-    <script type="module" src="src/js/app.js"></script>
+    <div id="game-container"></div>
+    <script type="module" src="src/v2/main.js"></script>
 </body>
 </html>
