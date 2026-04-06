@@ -4,7 +4,7 @@
 
 This project is a small static one-page web application that implements a Minesweeper clone. The application shall reproduce the core rules and interactions of classic Minesweeper while keeping scope and implementation complexity low.
 
-The initial version shall be self-contained, run entirely in the browser, and require no backend services, accounts, networking, or persistent online storage.
+The initial version shall be self-contained, run entirely in the browser, and require no backend services, accounts, networking, or remote storage. It shall include local persistence for highscores.
 
 ## Goals
 
@@ -12,6 +12,7 @@ The initial version shall be self-contained, run entirely in the browser, and re
 * Keep the application small enough to implement as a simple one-page web app.
 * Define requirements that are precise enough to guide design, implementation, and testing.
 * Exclude features that do not directly support core Minesweeper play.
+* Provide a highscore system to track and display fastest win times for each difficulty.
 
 ## Non-Goals
 
@@ -72,6 +73,8 @@ The application shall display:
 * a restart control
 * a timer
 * difficulty selection controls
+* an instructions dialog trigger
+* a highscore screen trigger
 
 ### Board Presentation
 
@@ -79,6 +82,7 @@ The application shall display:
 * Revealed numbered cells shall display their adjacent-mine count.
 * Cells shall be arranged in a visible square grid.
 * The full playable interface shall be available on a single page.
+* Instructions and Highscores shall be presented as modal dialogs.
 
 ### Layout Constraints
 

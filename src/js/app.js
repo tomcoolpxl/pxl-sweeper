@@ -12,7 +12,18 @@ const CONFIG = {
         GAME_STATUS: 'game-status',
         BTN_BEGINNER: 'btn-beginner',
         BTN_INTERMEDIATE: 'btn-intermediate',
-        BTN_EXPERT: 'btn-expert'
+        BTN_EXPERT: 'btn-expert',
+        BTN_INSTRUCTIONS: 'btn-instructions',
+        BTN_HIGHSCORES: 'btn-highscores',
+        INSTRUCTIONS_MODAL: 'instructions-modal',
+        HIGHSCORES_MODAL: 'highscores-modal',
+        CONFIRM_MODAL: 'confirm-modal',
+        CONFIRM_YES: 'confirm-yes',
+        CONFIRM_NO: 'confirm-no',
+        BTN_CLEAR_SCORES: 'btn-clear-scores',
+        SCORE_BEGINNER: 'score-beginner',
+        SCORE_INTERMEDIATE: 'score-intermediate',
+        SCORE_EXPERT: 'score-expert'
     },
     EMOJIS: {
         MINE: '💣',
@@ -22,6 +33,15 @@ const CONFIG = {
         HAPPY: '😊',
         LOST: '😵',
         WON: '😎'
+    },
+    CONSTANTS: {
+        TIMER_INTERVAL_MS: 1000,
+        TIMER_MAX_SECONDS: 999,
+        PAD_LENGTH_DEFAULT: 3,
+        PAD_LENGTH_MINES_NEGATIVE: 2,
+        FIRST_CLICK_EXCLUDE_DEFAULT: -1,
+        MINE_COUNT_SIGN_THRESHOLD: 0,
+        LOCAL_STORAGE_KEY: 'pxl_sweeper_scores'
     }
 };
 
@@ -77,7 +97,7 @@ export class Board {
      * Randomly places mines on the grid, ensuring the first click is safe.
      * @param {number} excludeIndex - Index to exclude from mine placement.
      */
-    placeMines(excludeIndex = -1) {
+    placeMines(excludeIndex = CONFIG.CONSTANTS.FIRST_CLICK_EXCLUDE_DEFAULT) {
         let placedMines = 0;
         while (placedMines < this.mineCount) {
             const randomIndex = Math.floor(Math.random() * this.grid.length);
@@ -165,7 +185,7 @@ export class Game {
         this.difficulty = DIFFICULTIES.BEGINNER;
         this.secondsElapsed = 0;
         this.timerInterval = null;
-        this.triggeredMineIndex = -1;
+        this.triggeredMineIndex = CONFIG.CONSTANTS.FIRST_CLICK_EXCLUDE_DEFAULT;
         
         this.init();
     }
@@ -179,6 +199,29 @@ export class Game {
         document.getElementById(SELECTORS.BTN_INTERMEDIATE).addEventListener('click', () => this.newGame(DIFFICULTIES.INTERMEDIATE));
         document.getElementById(SELECTORS.BTN_EXPERT).addEventListener('click', () => this.newGame(DIFFICULTIES.EXPERT));
         document.getElementById(SELECTORS.RESTART_BTN).addEventListener('click', () => this.newGame(this.difficulty));
+
+        // Dialog Listeners
+        document.getElementById(SELECTORS.BTN_INSTRUCTIONS).addEventListener('click', () => {
+            document.getElementById(SELECTORS.INSTRUCTIONS_MODAL).showModal();
+        });
+
+        document.getElementById(SELECTORS.BTN_HIGHSCORES).addEventListener('click', () => {
+            this.updateHighscoresUI();
+            document.getElementById(SELECTORS.HIGHSCORES_MODAL).showModal();
+        });
+
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.target.closest('dialog').close();
+            });
+        });
+
+        document.getElementById(SELECTORS.BTN_CLEAR_SCORES).addEventListener('click', async () => {
+            const confirmed = await this.showConfirm('Are you sure you want to clear all highscores?');
+            if (confirmed) {
+                this.clearHighscores();
+            }
+        });
 
         const container = document.getElementById(SELECTORS.BOARD_CONTAINER);
         
@@ -206,6 +249,43 @@ export class Game {
     }
 
     /**
+     * Shows a custom confirmation dialog.
+     * @param {string} message - The message to display.
+     * @returns {Promise<boolean>} Resolves with true if confirmed, false otherwise.
+     */
+    showConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById(CONFIG.SELECTORS.CONFIRM_MODAL);
+            const yesBtn = document.getElementById(CONFIG.SELECTORS.CONFIRM_YES);
+            const noBtn = document.getElementById(CONFIG.SELECTORS.CONFIRM_NO);
+            const messageEl = document.getElementById('confirm-message');
+
+            messageEl.textContent = message;
+
+            const handleYes = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            const handleNo = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            const cleanup = () => {
+                yesBtn.removeEventListener('click', handleYes);
+                noBtn.removeEventListener('click', handleNo);
+                modal.close();
+            };
+
+            yesBtn.addEventListener('click', handleYes);
+            noBtn.addEventListener('click', handleNo);
+
+            modal.showModal();
+        });
+    }
+
+    /**
      * Resets the game state and UI for a new match.
      * @param {Object} difficulty - The difficulty settings to apply.
      */
@@ -215,7 +295,7 @@ export class Game {
         this.board = new Board(difficulty);
         this.state = GAME_STATES.NOT_STARTED;
         this.secondsElapsed = 0;
-        this.triggeredMineIndex = -1;
+        this.triggeredMineIndex = CONFIG.CONSTANTS.FIRST_CLICK_EXCLUDE_DEFAULT;
         
         this.updateMineCounterUI();
         this.updateTimerUI();
@@ -321,9 +401,10 @@ export class Game {
         const flaggedCount = this.board.grid.filter(c => c.isFlagged).length;
         const remaining = this.board.mineCount - flaggedCount;
         
-        const sign = remaining < 0 ? '-' : '';
+        const sign = remaining < CONFIG.CONSTANTS.MINE_COUNT_SIGN_THRESHOLD ? '-' : '';
         const absVal = Math.abs(remaining);
-        const displayVal = sign + String(absVal).padStart(sign ? 2 : 3, '0');
+        const padLength = sign ? CONFIG.CONSTANTS.PAD_LENGTH_MINES_NEGATIVE : CONFIG.CONSTANTS.PAD_LENGTH_DEFAULT;
+        const displayVal = sign + String(absVal).padStart(padLength, '0');
         
         document.getElementById(CONFIG.SELECTORS.MINE_COUNT_DISPLAY).textContent = displayVal;
     }
@@ -334,11 +415,11 @@ export class Game {
     startTimer() {
         if (this.timerInterval) return;
         this.timerInterval = setInterval(() => {
-            if (this.secondsElapsed < 999) {
+            if (this.secondsElapsed < CONFIG.CONSTANTS.TIMER_MAX_SECONDS) {
                 this.secondsElapsed++;
                 this.updateTimerUI();
             }
-        }, 1000);
+        }, CONFIG.CONSTANTS.TIMER_INTERVAL_MS);
     }
 
     /**
@@ -355,7 +436,7 @@ export class Game {
      * Updates the timer display in the HUD.
      */
     updateTimerUI() {
-        document.getElementById(CONFIG.SELECTORS.TIMER_DISPLAY).textContent = String(this.secondsElapsed).padStart(3, '0');
+        document.getElementById(CONFIG.SELECTORS.TIMER_DISPLAY).textContent = String(this.secondsElapsed).padStart(CONFIG.CONSTANTS.PAD_LENGTH_DEFAULT, '0');
     }
 
     /**
@@ -431,6 +512,8 @@ export class Game {
         document.getElementById(CONFIG.SELECTORS.RESTART_BTN).textContent = CONFIG.EMOJIS.WON;
         this.updateStatusUI('YOU WIN!');
 
+        this.checkHighscore();
+
         this.board.grid.forEach((cell, idx) => {
             if (cell.isMine && !cell.isFlagged) {
                 cell.isFlagged = true;
@@ -438,6 +521,67 @@ export class Game {
             }
         });
         this.updateMineCounterUI();
+    }
+
+    /**
+     * Checks if current score is a new highscore for current difficulty.
+     */
+    checkHighscore() {
+        const scores = this.getHighscores();
+        const diffName = this.getDifficultyName();
+        const currentBest = scores[diffName];
+
+        if (currentBest === null || this.secondsElapsed < currentBest) {
+            scores[diffName] = this.secondsElapsed;
+            this.saveHighscores(scores);
+            this.updateStatusUI(`NEW RECORD: ${this.secondsElapsed}s!`);
+        }
+    }
+
+    /**
+     * @returns {Object} Current highscores from localStorage.
+     */
+    getHighscores() {
+        const data = localStorage.getItem(CONFIG.CONSTANTS.LOCAL_STORAGE_KEY);
+        return data ? JSON.parse(data) : { BEGINNER: null, INTERMEDIATE: null, EXPERT: null };
+    }
+
+    /**
+     * Saves scores to localStorage.
+     * @param {Object} scores - The scores object to save.
+     */
+    saveHighscores(scores) {
+        localStorage.setItem(CONFIG.CONSTANTS.LOCAL_STORAGE_KEY, JSON.stringify(scores));
+    }
+
+    /**
+     * Clears all highscores.
+     */
+    clearHighscores() {
+        localStorage.removeItem(CONFIG.CONSTANTS.LOCAL_STORAGE_KEY);
+        this.updateHighscoresUI();
+    }
+
+    /**
+     * Updates the Highscores UI with stored values.
+     */
+    updateHighscoresUI() {
+        const scores = this.getHighscores();
+        const { SELECTORS } = CONFIG;
+        
+        document.getElementById(SELECTORS.SCORE_BEGINNER).textContent = scores.BEGINNER || '---';
+        document.getElementById(SELECTORS.SCORE_INTERMEDIATE).textContent = scores.INTERMEDIATE || '---';
+        document.getElementById(SELECTORS.SCORE_EXPERT).textContent = scores.EXPERT || '---';
+    }
+
+    /**
+     * @returns {string} Key name for current difficulty.
+     */
+    getDifficultyName() {
+        if (this.difficulty === DIFFICULTIES.BEGINNER) return 'BEGINNER';
+        if (this.difficulty === DIFFICULTIES.INTERMEDIATE) return 'INTERMEDIATE';
+        if (this.difficulty === DIFFICULTIES.EXPERT) return 'EXPERT';
+        return 'CUSTOM';
     }
 
     /**

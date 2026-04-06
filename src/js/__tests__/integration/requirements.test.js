@@ -13,8 +13,19 @@ describe('Requirements Coverage', () => {
             <button id="btn-beginner"></button>
             <button id="btn-intermediate"></button>
             <button id="btn-expert"></button>
+            <button id="btn-instructions"></button>
+            <button id="btn-highscores"></button>
             <div id="board-container"></div>
+            <dialog id="instructions-modal"><button class="close-modal"></button></dialog>
+            <dialog id="highscores-modal">
+                <span id="score-beginner">---</span>
+                <span id="score-intermediate">---</span>
+                <span id="score-expert">---</span>
+                <button id="btn-clear-scores"></button>
+                <button class="close-modal"></button>
+            </dialog>
         `;
+
         vi.useFakeTimers();
         game = new Game();
     });

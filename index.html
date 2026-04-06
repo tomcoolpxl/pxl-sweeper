@@ -15,6 +15,8 @@
                 <button id="btn-beginner" aria-label="Start Beginner Game">Beginner</button>
                 <button id="btn-intermediate" aria-label="Start Intermediate Game">Intermediate</button>
                 <button id="btn-expert" aria-label="Start Expert Game">Expert</button>
+                <button id="btn-instructions" aria-label="Show Instructions">?</button>
+                <button id="btn-highscores" aria-label="Show Highscores">🏆</button>
             </div>
         </header>
 
@@ -27,6 +29,47 @@
             <div id="game-status" aria-live="polite"></div>
             <div id="board-container" role="grid" aria-label="Minesweeper Board"></div>
         </main>
+
+        <!-- Dialogs -->
+        <dialog id="instructions-modal">
+            <div class="modal-content">
+                <h2>How to Play</h2>
+                <ul>
+                    <li><strong>Left-Click:</strong> Reveal a cell.</li>
+                    <li><strong>Right-Click:</strong> Cycle through Flag (🚩), Question (?), and Unmarked.</li>
+                    <li><strong>Numbers:</strong> Show how many mines are in the 8 adjacent cells.</li>
+                    <li><strong>Safety:</strong> Your first click is always safe from mines!</li>
+                    <li><strong>Win:</strong> Reveal all cells that do not contain mines.</li>
+                </ul>
+                <button class="close-modal">Close</button>
+            </div>
+        </dialog>
+
+        <dialog id="highscores-modal">
+            <div class="modal-content">
+                <h2>Local Highscores</h2>
+                <div id="highscores-list">
+                    <div class="score-row"><span>Beginner:</span> <span id="score-beginner">---</span>s</div>
+                    <div class="score-row"><span>Intermediate:</span> <span id="score-intermediate">---</span>s</div>
+                    <div class="score-row"><span>Expert:</span> <span id="score-expert">---</span>s</div>
+                </div>
+                <div class="modal-actions">
+                    <button id="btn-clear-scores">Clear All</button>
+                    <button class="close-modal">Close</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="confirm-modal">
+            <div class="modal-content">
+                <h2>Are you sure?</h2>
+                <p id="confirm-message">This action cannot be undone.</p>
+                <div class="modal-actions">
+                    <button id="confirm-yes">Yes, Clear</button>
+                    <button id="confirm-no" class="close-modal">Cancel</button>
+                </div>
+            </div>
+        </dialog>
     </div>
     <script src="src/js/app.js"></script>
 </body>

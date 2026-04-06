@@ -77,3 +77,25 @@
 - [x] Adjusted integration tests to verify the 16x30 grid configuration.
 - [x] Verified that all tests pass with the new layout.
 
+## Phase 12: Instructions Dialog (Completed April 6, 2026)
+- [x] Implemented a native HTML5 `<dialog>` for game instructions.
+- [x] Added a `?` trigger button to the difficulty controls.
+- [x] Documented core mechanics (Reveal, Flag, Question Mark, First-Click Safety).
+- [x] Styled modals with semi-transparent backdrops and high-contrast typography.
+- [x] Verified modal open/close functionality via integration tests.
+
+## Phase 13: Local Highscores (Completed April 6, 2026)
+- [x] Implemented persistent score tracking using `localStorage`.
+- [x] Added a `🏆` trigger button and modal to display fastest times for all difficulties.
+- [x] Implemented real-time "New Record" HUD feedback on game win.
+- [x] Added "Clear All" functionality to reset highscores.
+- [x] Implemented a global test setup to mock `localStorage` and `dialog` APIs in JSDOM.
+- [x] Maintained 99% statement coverage across all game logic.
+
+## Phase 14: Final Polish & Magic Number Refactor (Completed April 6, 2026)
+- [x] Eliminated magic numbers by centralizing game constants (timers, padding, storage keys) in `CONFIG.CONSTANTS`.
+- [x] Replaced browser `window.confirm` with a custom in-game `<dialog>` for highscore clearing.
+- [x] Refactored `showConfirm` as a Promise-based utility for asynchronous UI flow.
+- [x] Updated integration tests to verify asynchronous custom modal interactions.
+- [x] Verified 100% test pass rate with 99.21% logic coverage.
+

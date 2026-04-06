@@ -45,3 +45,19 @@
 - [x] Refactor UI rendering to reduce cyclomatic complexity
 - [x] Implement ESLint for automated style enforcement
 - [x] Achieve 99% statement coverage in core logic
+
+## Phase 11: Layout Optimization (Landscape Mode)
+- [x] Swapped Expert difficulty dimensions from portrait (30x16) to landscape (16x30)
+- [x] Updated `REQUIREMENTS.md` and tests to reflect the new layout
+
+## Phase 12: Instructions Dialog
+- [x] Add instructions trigger and modal UI
+- [x] Implement instructions content (rules and mechanics)
+- [x] Verify modal functionality with integration tests
+
+## Phase 13: Local Highscores
+- [x] Implement `localStorage` persistence for fastest times
+- [x] Create highscore screen UI and data binding
+- [x] Implement win-condition record checking and "New Record" HUD feedback
+- [x] Add "Clear Highscores" functionality
+- [x] Verify persistence and UI logic with comprehensive test suite
