@@ -2,7 +2,7 @@
 
 This repository builds the PXL Sweep game.
 
-`requirements.md` is the current project truth.
+`REQUIREMENTS.md` is the current project truth.
 
 - Keep work small enough for one review cycle.
 - Stay inside the accepted requirements.
