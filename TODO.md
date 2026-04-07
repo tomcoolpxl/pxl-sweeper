@@ -66,3 +66,9 @@
 - [x] Configure Vite with a relative base path for project-site deployments
 - [x] Add a regression test for the Pages asset-base setting
 - [x] Verify the production build emits relative asset URLs
+
+## Phase 25: Persistent Ambient Music
+- [x] Register the bundled ambient `.ogg` track for V2 boot
+- [x] Loop background music across menu, gameplay, and overlays
+- [x] Respect the HUD mute toggle for both music and synthesized SFX
+- [x] Add unit coverage for music activation and mute/resume behavior

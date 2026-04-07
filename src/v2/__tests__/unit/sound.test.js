@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // Control the ctx.state returned by each new MockAudioContext
 let nextCtxState = 'running';
 const instances = [];
+const audioInstances = [];
 
 class MockAudioContext {
     constructor() {
@@ -25,7 +26,27 @@ class MockAudioContext {
     }
 }
 
+class MockAudio {
+    constructor(src) {
+        this.src = src;
+        this.loop = false;
+        this.preload = '';
+        this.volume = 1;
+        this.paused = true;
+        this.ended = false;
+        this.play = vi.fn(() => {
+            this.paused = false;
+            return Promise.resolve();
+        });
+        this.pause = vi.fn(() => {
+            this.paused = true;
+        });
+        audioInstances.push(this);
+    }
+}
+
 vi.stubGlobal('AudioContext', MockAudioContext);
+vi.stubGlobal('Audio', MockAudio);
 
 const { SoundManager } = await import('../../utils/SoundManager.js');
 
@@ -34,6 +55,7 @@ describe('SoundManager', () => {
 
     beforeEach(() => {
         instances.length = 0;
+        audioInstances.length = 0;
         nextCtxState = 'running';
         manager = new SoundManager();
     });
@@ -98,5 +120,38 @@ describe('SoundManager', () => {
         expect(m.enabled).toBe(false);
         // Restore mock for subsequent tests
         vi.stubGlobal('AudioContext', MockAudioContext);
+    });
+
+    it('should create and play looping background music when activated', () => {
+        manager.setBackgroundTrack('/assets/ambient.ogg');
+
+        manager.activateMusic();
+
+        expect(audioInstances).toHaveLength(1);
+        expect(audioInstances[0].src).toBe('/assets/ambient.ogg');
+        expect(audioInstances[0].loop).toBe(true);
+        expect(audioInstances[0].preload).toBe('auto');
+        expect(audioInstances[0].volume).toBe(0.32);
+        expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not restart background music while it is already playing', () => {
+        manager.setBackgroundTrack('/assets/ambient.ogg');
+
+        manager.activateMusic();
+        manager.activateMusic();
+
+        expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
+    });
+
+    it('should pause and resume background music when toggled', () => {
+        manager.setBackgroundTrack('/assets/ambient.ogg');
+        manager.activateMusic();
+
+        expect(manager.toggleEnabled()).toBe(false);
+        expect(audioInstances[0].pause).toHaveBeenCalledTimes(1);
+
+        expect(manager.toggleEnabled()).toBe(true);
+        expect(audioInstances[0].play).toHaveBeenCalledTimes(2);
     });
 });

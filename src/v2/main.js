@@ -4,8 +4,12 @@ import { MenuScene } from './scenes/MenuScene';
 import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 import { V2_CONFIG } from './config';
+import { soundManager } from './utils/SoundManager';
+import ambientTrackUrl from '../../assets/Underwater-Ambient-Pad-isaiah658.ogg';
 
 // #16: BootScene removed — PreloadScene is the entry point directly
+
+soundManager.setBackgroundTrack(ambientTrackUrl);
 
 const config = {
     type: Phaser.AUTO,

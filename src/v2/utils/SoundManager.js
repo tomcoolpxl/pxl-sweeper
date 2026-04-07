@@ -5,6 +5,49 @@ export class SoundManager {
         this.ctx = null;  // #2: lazy init — do not touch AudioContext at import time
         this.enabled = true;
         this.lastRevealTime = 0;
+        this.backgroundTrackUrl = null;
+        this.musicEl = null;
+    }
+
+    setBackgroundTrack(url) {
+        this.backgroundTrackUrl = url;
+    }
+
+    activateMusic() {
+        if (!this.backgroundTrackUrl || typeof Audio === 'undefined') return;
+
+        if (!this.musicEl) {
+            this.musicEl = new Audio(this.backgroundTrackUrl);
+            this.musicEl.loop = true;
+            this.musicEl.preload = 'auto';
+            this.musicEl.volume = 0.32;
+        }
+
+        if (!this.enabled) {
+            this.musicEl.pause();
+            return;
+        }
+
+        if (!this.musicEl.paused && !this.musicEl.ended) {
+            return;
+        }
+
+        const playPromise = this.musicEl.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => {});
+        }
+    }
+
+    toggleEnabled() {
+        this.enabled = !this.enabled;
+
+        if (!this.enabled) {
+            this.musicEl?.pause();
+            return this.enabled;
+        }
+
+        this.activateMusic();
+        return this.enabled;
     }
 
     // #2/#3: initialise context on first use; resume if suspended (Chrome autoplay policy)
@@ -24,6 +67,7 @@ export class SoundManager {
     }
 
     playReveal() {
+        this.activateMusic();
         const ctx = this._ensureContext();
         if (!this.enabled || !ctx) return;
 
@@ -50,6 +94,7 @@ export class SoundManager {
     }
 
     playFlag() {
+        this.activateMusic();
         const ctx = this._ensureContext();
         if (!this.enabled || !ctx) return;
 
@@ -72,6 +117,7 @@ export class SoundManager {
     }
 
     playWin() {
+        this.activateMusic();
         const ctx = this._ensureContext();
         if (!this.enabled || !ctx) return;
 
@@ -97,6 +143,7 @@ export class SoundManager {
     }
 
     playLoss() {
+        this.activateMusic();
         const ctx = this._ensureContext();
         if (!this.enabled || !ctx) return;
 

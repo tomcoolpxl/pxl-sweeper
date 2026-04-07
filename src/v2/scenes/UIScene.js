@@ -38,8 +38,8 @@ export class UIScene extends Phaser.Scene {
         });
 
         this.muteBtn = this.createHudButton(hudLayout.sound.centerX, hudLayout.sound.centerY, hudLayout.sound.width, soundManager.enabled ? 'SOUND ON' : 'SOUND OFF', UI.COLORS.ACCENT_GOLD, () => {
-            soundManager.enabled = !soundManager.enabled;
-            this.muteBtnLabel.setText(soundManager.enabled ? 'SOUND ON' : 'SOUND OFF');
+            const enabled = soundManager.toggleEnabled();
+            this.muteBtnLabel.setText(enabled ? 'SOUND ON' : 'SOUND OFF');
         });
 
         // Game Over Overlay

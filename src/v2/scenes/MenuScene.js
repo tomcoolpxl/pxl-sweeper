@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { highscoreManager } from '../utils/HighscoreManager';
+import { soundManager } from '../utils/SoundManager';
 import { V2_CONFIG } from '../config';
 
 export class MenuScene extends Phaser.Scene {
@@ -261,7 +262,10 @@ export class MenuScene extends Phaser.Scene {
         const hitZone = this.add.zone(0, 0, width, height)
             .setRectangleDropZone(width, height)
             .setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.scene.start('GameScene', { difficulty: options.difficulty }));
+            .on('pointerdown', () => {
+                soundManager.activateMusic();
+                this.scene.start('GameScene', { difficulty: options.difficulty });
+            });
 
         hitZone.on('pointerover', () => {
             this.tweens.add({
@@ -379,7 +383,10 @@ export class MenuScene extends Phaser.Scene {
         const hitZone = this.add.zone(0, 0, width, height)
             .setRectangleDropZone(width, height)
             .setInteractive({ useHandCursor: true })
-            .on('pointerdown', options.callback);
+            .on('pointerdown', () => {
+                soundManager.activateMusic();
+                options.callback();
+            });
 
         hitZone.on('pointerover', () => {
             this.tweens.add({
@@ -579,7 +586,10 @@ export class MenuScene extends Phaser.Scene {
         const hitZone = this.add.zone(0, 0, width, height)
             .setRectangleDropZone(width, height)
             .setInteractive({ useHandCursor: true })
-            .on('pointerdown', callback);
+            .on('pointerdown', () => {
+                soundManager.activateMusic();
+                callback();
+            });
 
         hitZone.on('pointerover', () => {
             this.tweens.add({

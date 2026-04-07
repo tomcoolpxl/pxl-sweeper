@@ -169,3 +169,10 @@
 - [x] Configured Vite to build with a relative `base` path so project-site deployments resolve bundled assets under `/pxl-sweeper/`.
 - [x] Added a regression test to lock the GitHub Pages asset-base behavior in place.
 - [x] Reproduced the broken root-relative asset URLs locally and verified the generated build now emits relative asset URLs.
+
+## Phase 25: Persistent Ambient Music (Completed April 7, 2026)
+- [x] Registered the bundled ambient `.ogg` track in `src/v2/main.js` so Vite emits it with the production build.
+- [x] Extended `SoundManager` to own a persistent looping music element alongside the existing synthesized SFX path.
+- [x] Activated the music loop from menu interactions and gameplay SFX entry points so browser autoplay policy is satisfied without scene-coupled audio state.
+- [x] Wired the HUD mute toggle to pause and resume the ambient loop in sync with the existing sound-effects enable flag.
+- [x] Added unit coverage for music activation, loop configuration, and mute/resume behavior, then verified lint, tests, build, and runnable state.
