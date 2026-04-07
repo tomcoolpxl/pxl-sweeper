@@ -1,10 +1,10 @@
 export const V2_CONFIG = {
     // Layout & Scaling
     LAYOUT: {
-        HUD_HEIGHT: 100,
+        HUD_HEIGHT: 80, // Reduced from 100 to save space
         BASE_PADDING: 2,
         MAX_TILE_SIZE: 32,
-        MARGIN_PERCENT: 0.95,
+        MARGIN_PERCENT: 0.90, // Reduced from 0.95 to ensure clear safety margins
         UI_PADDING: 20,
         BOARD_OFFSET_Y_DIV: 4
     },
@@ -37,10 +37,10 @@ export const V2_CONFIG = {
             DIMMER_ALPHA: 0.7,
             TITLE_OFFSET_Y: 140,
             CLOSE_BTN_OFFSET_Y: 130,
-            STATS_OFFSET_Y: 0,
-            STATUS_OFFSET_Y: 40,
-            PLAY_AGAIN_OFFSET_Y: 30,
-            MAIN_MENU_OFFSET_Y: 80
+            STATS_OFFSET_Y: 20,
+            STATUS_OFFSET_Y: 80,
+            PLAY_AGAIN_OFFSET_Y: 50,
+            MAIN_MENU_OFFSET_Y: 110
         },
         COLORS: {
             WHITE: '#ffffff',
@@ -71,7 +71,7 @@ export const V2_CONFIG = {
             BTN_START_Y_PCT: 0.45,
             BTN_SPACING: 60,
             THEME_BTN_OFFSET_Y: 50,
-            TUTORIAL_OFFSET_Y_SPACING: 3.3
+            TUTORIAL_OFFSET_Y_SPACING: 4.3 // Adjusted to 4.3 to match actual code
         }
     },
     // Preload Constants

@@ -52,26 +52,27 @@ export class UIScene extends Phaser.Scene {
         // Game Over Overlay (Hidden initially)
         this.overlay = this.add.container(0, 0).setVisible(false);
         const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
-        const modal = this.add.rectangle(width / 2, height / 2, UI.MODAL.WIDTH, UI.MODAL.HEIGHT, UI.MODAL.BG).setOrigin(0.5);
+        const modal = this.add.rectangle(width / 2, height / 2, 400, 300, UI.MODAL.BG).setOrigin(0.5);
         
         this.statusText = this.add.text(width / 2, height / 2 - UI.MODAL.STATUS_OFFSET_Y, '', {
-            fontSize: '32px',
+            fontSize: '36px',
             fill: UI.COLORS.WHITE,
             fontFamily: 'monospace',
             fontWeight: 'bold'
         }).setOrigin(0.5);
         
         this.statsText = this.add.text(width / 2, height / 2 - UI.MODAL.STATS_OFFSET_Y, '', {
-            fontSize: '18px',
+            fontSize: '20px',
             fill: UI.COLORS.WHITE,
-            fontFamily: 'monospace'
+            fontFamily: 'monospace',
+            align: 'center'
         }).setOrigin(0.5);
 
         const playAgainBtn = this.add.text(width / 2, height / 2 + UI.MODAL.PLAY_AGAIN_OFFSET_Y, 'PLAY AGAIN', {
-            fontSize: '20px',
+            fontSize: '24px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.WIN,
-            padding: { x: 15, y: 8 }
+            padding: { x: 20, y: 10 }
         })
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
@@ -162,12 +163,21 @@ export class UIScene extends Phaser.Scene {
         const { UI, TIMERS } = V2_CONFIG;
         this.stopTimer();
         
+        const scores = highscoreManager.getScores();
+        const best = scores[this.engine.difficultyKey];
+        
         let status = won ? 'YOU WIN! 😎' : 'GAME OVER 😵';
         if (isNewRecord) status = 'NEW RECORD! 🏆';
         
         this.statusText.setText(status);
         this.statusText.setColor(won ? UI.COLORS.WIN : UI.COLORS.LOSS);
-        this.statsText.setText(`Time: ${this.secondsElapsed}s\nMines: ${this.engine.mineCount}`);
+        
+        const stats = [
+            `TIME: ${this.secondsElapsed}s`,
+            `BEST: ${best ? best + 's' : '---'}`
+        ].join('\n');
+        
+        this.statsText.setText(stats);
         
         this.overlay.setVisible(true);
         this.overlay.setAlpha(0);
