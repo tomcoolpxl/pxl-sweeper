@@ -47,6 +47,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
@@ -56,9 +59,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           DEPLOY_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
+          # Fetch existing release notes and append the live demo link
+          gh release view ${{ github.event.release.tag_name }} --repo ${{ github.repository }} --json body --template '{{.body}}' > release_notes.txt
+          echo -e "\n\n---\n🚀 **Live Demo:** [${{ steps.deployment.outputs.page_url }}](${{ steps.deployment.outputs.page_url }})" >> release_notes.txt
+          
+          # Update the release with the new notes file
           gh release edit ${{ github.event.release.tag_name }} \
             --repo ${{ github.repository }} \
-            --notes "$(gh release view ${{ github.event.release.tag_name }} --repo ${{ github.repository }} --json body --template '{{.body}}')
-
-          ---
-          🚀 **Live Demo:** [${{ steps.deployment.outputs.page_url }}](${{ steps.deployment.outputs.page_url }})"
+            --notes-file release_notes.txt
