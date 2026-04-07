@@ -6,6 +6,7 @@ This repository builds the PXL Sweep game.
 
 ## Testing Mandates
 
+- Make sure currently running webservers are killed first, before starting up a new local webserver for testing
 - **Test-Driven Development**: Every new feature, implementation, or bug fix MUST be accompanied by new tests (unit, integration, or both).
 - **Comprehensive Coverage**: Maintain and track high code coverage (target >90%). Use `npm run test:coverage` to verify.
 - **Requirement Traceability**: Tests must explicitly cover all functional requirements and acceptance criteria defined in `REQUIREMENTS.md`.

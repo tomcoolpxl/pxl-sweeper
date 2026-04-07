@@ -1,6 +1,7 @@
 {
   "name": "pxl-sweeper",
   "version": "1.0.0",
+  "type": "module",
   "description": "A modern, high-contrast Minesweeper clone.",
   "scripts": {
     "dev": "vite",
