@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { MinesweeperEngine, GAME_STATES } from '../MinesweeperEngine';
 import { soundManager } from '../utils/SoundManager';
 import { themeManager } from '../utils/ThemeManager';
+import { V2_CONFIG } from '../config';
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -19,14 +20,6 @@ export class GameScene extends Phaser.Scene {
     create() {
         const { width, height } = this.cameras.main;
         
-        // Ensure particle texture exists for win/loss effects
-        if (!this.textures.exists('particle_rect')) {
-            const g = this.make.graphics({ x: 0, y: 0, add: false });
-            g.fillStyle(0xffffff, 1);
-            g.fillRect(0, 0, 4, 4);
-            g.generateTexture('particle_rect', 4, 4);
-        }
-
         this.calculateScaling();
         this.createBoard();
 
@@ -36,26 +29,22 @@ export class GameScene extends Phaser.Scene {
 
     calculateScaling() {
         const { width, height } = this.cameras.main;
-        const hudHeight = 100; // Expected HUD space
-        const availableWidth = width * 0.95; // 5% margin
-        const availableHeight = (height - hudHeight) * 0.95;
+        const hudHeight = V2_CONFIG.LAYOUT.HUD_HEIGHT;
+        const margin = V2_CONFIG.LAYOUT.MARGIN_PERCENT;
+        const availableWidth = width * margin;
+        const availableHeight = (height - hudHeight) * margin;
 
-        // Base tile size and padding
-        const basePadding = 2;
+        const basePadding = V2_CONFIG.LAYOUT.BASE_PADDING;
         
-        // Calculate required tile size to fit board in available space
         const tileW = (availableWidth / this.engine.cols) - basePadding;
         const tileH = (availableHeight / this.engine.rows) - basePadding;
         
-        // Use the smaller of the two to maintain square tiles
-        this.tileSize = Math.floor(Math.min(tileW, tileH, 32)); // Max 32px
+        this.tileSize = Math.floor(Math.min(tileW, tileH, V2_CONFIG.LAYOUT.MAX_TILE_SIZE));
         this.padding = basePadding;
 
-        // Calculate board dimensions
         const boardWidth = this.engine.cols * (this.tileSize + this.padding);
         const boardHeight = this.engine.rows * (this.tileSize + this.padding);
 
-        // Center board
         this.startX = (width - boardWidth) / 2 + (this.tileSize + this.padding) / 2;
         this.startY = (height - boardHeight) / 2 + (this.tileSize + this.padding) / 2 + (hudHeight / 4);
     }
@@ -70,7 +59,6 @@ export class GameScene extends Phaser.Scene {
 
             const tileContainer = this.add.container(x, y);
             
-            // Background / Hidden State
             const bg = this.add.rectangle(0, 0, this.tileSize, this.tileSize, this.theme.tileHidden)
                 .setInteractive({ useHandCursor: true });
             
@@ -83,14 +71,13 @@ export class GameScene extends Phaser.Scene {
             tileContainer.add([bg, text]);
             this.tiles[i] = { container: tileContainer, bg, text };
 
-            // Input handlers
             bg.on('pointerdown', (pointer) => {
                 if (this.engine.state === GAME_STATES.WON || this.engine.state === GAME_STATES.LOST) return;
 
                 if (pointer.rightButtonDown()) {
                     this.handleRightClick(i);
                 } else {
-                    this.longPressTimer = this.time.delayedCall(300, () => {
+                    this.longPressTimer = this.time.delayedCall(V2_CONFIG.TIMERS.LONG_PRESS_MS, () => {
                         this.handleRightClick(i);
                         this.longPressTimer = null;
                         tileContainer.setData('longPressed', true);
@@ -134,12 +121,12 @@ export class GameScene extends Phaser.Scene {
         if (this.engine.state === GAME_STATES.WON) {
             soundManager.playWin();
             this.triggerWinParticles();
-            this.triggerHaptic([100, 50, 100]);
+            this.triggerHaptic(V2_CONFIG.HAPTICS.WIN);
             this.events.emit('game-won');
         } else if (this.engine.state === GAME_STATES.LOST) {
             soundManager.playLoss();
             this.triggerLossParticles(this.tiles[this.engine.triggeredMineIndex].container);
-            this.triggerHaptic(200);
+            this.triggerHaptic(V2_CONFIG.HAPTICS.LOSS);
             this.events.emit('game-lost', this.engine.triggeredMineIndex);
         }
     }
@@ -148,10 +135,11 @@ export class GameScene extends Phaser.Scene {
         if (this.engine.grid[index].isRevealed) return;
         
         soundManager.playFlag();
-        this.triggerHaptic(50);
+        this.triggerHaptic(V2_CONFIG.HAPTICS.FLAG);
         this.engine.toggleMark(index);
         this.updateBoardUI();
     }
+
 
     updateBoardUI(revealedIndices = []) {
         for (let i = 0; i < this.engine.grid.length; i++) {

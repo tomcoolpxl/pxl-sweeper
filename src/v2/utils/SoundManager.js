@@ -1,3 +1,5 @@
+import { V2_CONFIG } from '../config';
+
 class SoundManager {
     constructor() {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -10,7 +12,7 @@ class SoundManager {
         
         // Throttle reveal sound for zero-expansion flood
         const now = Date.now();
-        if (now - this.lastRevealTime < 50) return;
+        if (now - this.lastRevealTime < V2_CONFIG.TIMERS.THROTTLE_REVEAL_SFX_MS) return;
         this.lastRevealTime = now;
 
         const osc = this.ctx.createOscillator();

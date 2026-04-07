@@ -44,6 +44,14 @@ export class PreloadScene extends Phaser.Scene {
     }
 
     create() {
+        // Generate common textures here to act as a dynamic atlas
+        if (!this.textures.exists('particle_rect')) {
+            const g = this.make.graphics({ x: 0, y: 0, add: false });
+            g.fillStyle(0xffffff, 1);
+            g.fillRect(0, 0, 4, 4);
+            g.generateTexture('particle_rect', 4, 4);
+        }
+
         this.scene.start('MenuScene');
     }
 }

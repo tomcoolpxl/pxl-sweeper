@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { themeManager } from '../utils/ThemeManager';
+import { V2_CONFIG } from '../config';
 
 export class UIScene extends Phaser.Scene {
     constructor() {
@@ -83,22 +84,34 @@ export class UIScene extends Phaser.Scene {
         
         gameScene.events.on('update-mines', (count) => {
             this.mineText.setText(`Mines: ${count}`);
+            this.updateA11y(`Mines remaining: ${count}`);
         });
 
         gameScene.events.on('game-won', () => {
             this.showGameOver(true);
+            this.updateA11y('You win! Game over.');
         });
 
         gameScene.events.on('game-lost', () => {
             this.showGameOver(false);
+            this.updateA11y('You hit a mine. Game over.');
         });
 
         gameScene.events.once('update-mines', () => {
             this.startTimer();
+            this.updateA11y('Game started.');
         });
 
         // Handle Resize
         this.scale.on('resize', this.handleResize, this);
+        this.updateA11y(`Minesweeper loaded. ${this.engine.getRemainingMines()} mines.`);
+    }
+
+    updateA11y(message) {
+        const hud = document.getElementById(V2_CONFIG.A11Y.HUD_ID);
+        if (hud) {
+            hud.textContent = message;
+        }
     }
 
     handleResize(gameSize) {
@@ -131,7 +144,7 @@ export class UIScene extends Phaser.Scene {
         this.tweens.add({
             targets: this.overlay,
             alpha: 1,
-            duration: 500
+            duration: V2_CONFIG.TIMERS.GAMEOVER_FADE_MS
         });
     }
 

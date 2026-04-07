@@ -6,6 +6,18 @@ import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 
 import { themeManager } from './utils/ThemeManager';
+import { registerSW } from 'virtual:pwa-register';
+
+const updateSW = registerSW({
+  onNeedRefresh() {
+    if (confirm('New content available. Reload?')) {
+      updateSW(true);
+    }
+  },
+  onOfflineReady() {
+    console.log('Game is ready to be played offline!');
+  },
+});
 
 const config = {
     type: Phaser.AUTO,
@@ -34,5 +46,8 @@ const config = {
 };
 
 window.addEventListener('load', () => {
-    new Phaser.Game(config);
+    const game = new Phaser.Game(config);
+    if (import.meta.env.DEV || import.meta.env.MODE === 'test') {
+        window.game = game;
+    }
 });
