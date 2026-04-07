@@ -164,3 +164,8 @@
 - [x] Removed the unnecessary `actions/checkout@v4` step from the `deploy` job in `.github/workflows/cd.yml`.
 - [x] Preserved the release-notes update step by relying on explicit `gh --repo` targeting instead of a local git checkout.
 - [x] Eliminated the deploy-job post-step failure where `git` ran outside a valid repository after a successful Pages deployment.
+
+## Phase 24: GitHub Pages Asset Path Fix (Completed April 7, 2026)
+- [x] Configured Vite to build with a relative `base` path so project-site deployments resolve bundled assets under `/pxl-sweeper/`.
+- [x] Added a regression test to lock the GitHub Pages asset-base behavior in place.
+- [x] Reproduced the broken root-relative asset URLs locally and verified the generated build now emits relative asset URLs.

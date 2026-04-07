@@ -61,3 +61,8 @@
 - [x] Implement win-condition record checking and "New Record" HUD feedback
 - [x] Add "Clear Highscores" functionality
 - [x] Verify persistence and UI logic with comprehensive test suite
+
+## Phase 24: GitHub Pages Asset Path Fix
+- [x] Configure Vite with a relative base path for project-site deployments
+- [x] Add a regression test for the Pages asset-base setting
+- [x] Verify the production build emits relative asset URLs

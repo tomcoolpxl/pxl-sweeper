@@ -26,6 +26,7 @@ AND v2 requirements are in `REQUIREMENTS_V2.md`
 - **Runnable State**: Maintain a `package.json` with a `start` script.
 - **Verification**: Always verify the "runnable" state via `npm start` before marking a task as done.
 - **GitHub Pages Deployments**: Keep the Pages `deploy` job checkout-free unless a later step strictly requires a repository worktree; `actions/deploy-pages` only needs the uploaded artifact, and avoiding checkout prevents post-job git cleanup failures.
+- **GitHub Pages Asset Paths**: For this project-site deployment, keep Vite asset URLs relative (for example `base: './'`) so built bundles load correctly under `/pxl-sweeper/` instead of the domain root.
 - Refresh `TODO.md` from the current plan phase.
 - Update `TODO.md` and `DONE.md` after implementation.
 - When `DONE.md` exists, it holds only verified work.
