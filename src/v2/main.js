@@ -6,8 +6,6 @@ import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 import { V2_CONFIG } from './config';
 
-// PWA registration is now handled automatically by vite-plugin-pwa (injectRegister: 'script')
-
 const config = {
     type: Phaser.AUTO,
     width: 800,

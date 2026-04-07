@@ -31,19 +31,13 @@ test.describe('V2 Minesweeper Bulletproof Smoke Test', () => {
         // Step 1: Navigate to the origin to allow storage access
         await page.goto('/');
         
-        // Step 2: Clean start (unregister SWs and clear storage)
+        // Step 2: Clean start (clear storage)
         await page.evaluate(async () => {
-            if ('serviceWorker' in navigator) {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                for (const registration of registrations) {
-                    await registration.unregister();
-                }
-            }
             window.localStorage.clear();
             window.sessionStorage.clear();
         });
 
-        // Step 3: Reload to ensure a clean, SW-free load
+        // Step 3: Reload to ensure a clean load
         const response = await page.goto('/', { waitUntil: 'networkidle' });
         expect(response?.status(), 'Initial load failed').toBeLessThan(400);
 
