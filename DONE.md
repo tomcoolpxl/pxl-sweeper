@@ -159,3 +159,8 @@
 - [x] Performed a full project linting audit and resolved 40+ indentation and style errors across the V2 codebase.
 - [x] Added `"type": "module"` to `package.json` to ensure modern ESM standard compliance.
 - [x] Verified zero linting errors and 100% test pass rate locally to prevent CI/CD regressions.
+
+## Phase 23: GitHub Pages Deploy Workflow Fix (Completed April 7, 2026)
+- [x] Removed the unnecessary `actions/checkout@v4` step from the `deploy` job in `.github/workflows/cd.yml`.
+- [x] Preserved the release-notes update step by relying on explicit `gh --repo` targeting instead of a local git checkout.
+- [x] Eliminated the deploy-job post-step failure where `git` ran outside a valid repository after a successful Pages deployment.
