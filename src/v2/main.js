@@ -6,18 +6,8 @@ import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 
 import { themeManager } from './utils/ThemeManager';
-import { registerSW } from 'virtual:pwa-register';
 
-const updateSW = registerSW({
-  onNeedRefresh() {
-    if (confirm('New content available. Reload?')) {
-      updateSW(true);
-    }
-  },
-  onOfflineReady() {
-    console.log('Game is ready to be played offline!');
-  },
-});
+// PWA registration is now handled automatically by vite-plugin-pwa (injectRegister: 'script')
 
 const config = {
     type: Phaser.AUTO,
