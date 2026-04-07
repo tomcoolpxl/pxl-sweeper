@@ -47,16 +47,24 @@ export class MinesweeperEngine {
     }
 
     placeMines(excludeIndex = V2_CONFIG.ENGINE.EXCLUDE_DEFAULT) {
-        // #20: guard against impossible mine counts
-        if (this.mineCount >= this.grid.length) {
-            throw new Error(`Cannot place ${this.mineCount} mines in a grid of ${this.grid.length} cells.`);
+        // Safe zone: clicked cell + all its neighbors — guarantees first click opens an empty cell
+        const safeZone = new Set();
+        if (excludeIndex >= 0 && excludeIndex < this.grid.length) {
+            safeZone.add(excludeIndex);
+            for (const n of this.getNeighborsByIndex(excludeIndex)) {
+                safeZone.add(n);
+            }
+        }
+
+        if (this.mineCount >= this.grid.length - safeZone.size) {
+            throw new Error(`Cannot place ${this.mineCount} mines outside a safe zone of ${safeZone.size} cells.`);
         }
 
         let placedMines = 0;
         while (placedMines < this.mineCount) {
             const randomIndex = Math.floor(Math.random() * this.grid.length);
 
-            if (randomIndex !== excludeIndex && !this.grid[randomIndex].isMine) {
+            if (!safeZone.has(randomIndex) && !this.grid[randomIndex].isMine) {
                 this.grid[randomIndex].isMine = true;
                 placedMines++;
             }

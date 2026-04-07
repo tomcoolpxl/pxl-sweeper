@@ -13,7 +13,8 @@ export class GameScene extends Phaser.Scene {
         this.engine = new MinesweeperEngine(this.difficultyKey);
         this.tiles = [];
         this.longPressTimer = null;
-        this.focusedIndex = 0;  // #17: keyboard navigation state
+        this.focusedIndex = 0;
+        this.keyboardActive = false;  // #17: keyboard nav is opt-in — must press an arrow key first
     }
 
     create() {
@@ -92,7 +93,12 @@ export class GameScene extends Phaser.Scene {
                         this.longPressTimer.remove();
                         this.longPressTimer = null;
                         if (!tileContainer.getData('longPressed')) {
-                            this.setFocus(i);  // #17: sync keyboard focus to mouse click
+                            // Mouse click: deactivate keyboard mode and move focus silently
+                            this.keyboardActive = false;
+                            if (this.tiles[this.focusedIndex]) {
+                                this.tiles[this.focusedIndex].bg.setStrokeStyle(0);
+                            }
+                            this.focusedIndex = i;
                             this.handleLeftClick(i);
                         }
                     }
@@ -113,17 +119,28 @@ export class GameScene extends Phaser.Scene {
         this.input.mouse.disableContextMenu();
     }
 
-    // #17: keyboard controls — arrow keys to navigate, Enter to reveal, Space to flag
+    // #17: keyboard controls — arrow keys activate keyboard mode; Enter/Space only work after first arrow key press
+    // This prevents accidental Enter/Space presses (e.g. held key on scene load) from bypassing first-click safety
     setupKeyboard() {
-        this.input.keyboard.on('keydown-UP', () => this.moveFocus(-this.engine.cols));
-        this.input.keyboard.on('keydown-DOWN', () => this.moveFocus(this.engine.cols));
-        this.input.keyboard.on('keydown-LEFT', () => this.moveFocus(-1));
-        this.input.keyboard.on('keydown-RIGHT', () => this.moveFocus(1));
-        this.input.keyboard.on('keydown-ENTER', () => this.handleLeftClick(this.focusedIndex));
-        this.input.keyboard.on('keydown-SPACE', () => this.handleRightClick(this.focusedIndex));
+        const activateAndMove = (delta) => {
+            if (!this.keyboardActive) {
+                this.keyboardActive = true;
+                this.setFocus(this.focusedIndex);  // show indicator on first intentional key press
+            }
+            this.moveFocus(delta);
+        };
 
-        // Show initial focus indicator
-        this.setFocus(0);
+        this.input.keyboard.on('keydown-UP', () => activateAndMove(-this.engine.cols));
+        this.input.keyboard.on('keydown-DOWN', () => activateAndMove(this.engine.cols));
+        this.input.keyboard.on('keydown-LEFT', () => activateAndMove(-1));
+        this.input.keyboard.on('keydown-RIGHT', () => activateAndMove(1));
+
+        this.input.keyboard.on('keydown-ENTER', () => {
+            if (this.keyboardActive) this.handleLeftClick(this.focusedIndex);
+        });
+        this.input.keyboard.on('keydown-SPACE', () => {
+            if (this.keyboardActive) this.handleRightClick(this.focusedIndex);
+        });
     }
 
     setFocus(index) {

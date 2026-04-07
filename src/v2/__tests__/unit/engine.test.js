@@ -30,13 +30,19 @@ describe('V2 MinesweeperEngine', () => {
         expect(mineCount).toBe(10);
     });
 
-    it('should never place a mine on the first click index', () => {
-        const firstClickIndex = 5;
+    it('should never place a mine on the first click index or any of its neighbors', () => {
+        const firstClickIndex = 40; // centre of 9x9 board — has 8 neighbors
         engine.placeMines(firstClickIndex);
         expect(engine.grid[firstClickIndex].isMine).toBe(false);
+        const neighbors = engine.getNeighborsByIndex(firstClickIndex);
+        for (const n of neighbors) {
+            expect(engine.grid[n].isMine).toBe(false);
+        }
+        // Clicked cell must have zero neighbor mines — flood-fill guaranteed
+        expect(engine.grid[firstClickIndex].neighborMines).toBe(0);
     });
 
-    it('should throw when mineCount >= grid length', () => {
+    it('should throw when mineCount >= available non-safe cells', () => {
         engine.mineCount = engine.grid.length;
         expect(() => engine.placeMines(0)).toThrow();
     });
