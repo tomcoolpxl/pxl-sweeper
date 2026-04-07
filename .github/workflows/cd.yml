@@ -5,7 +5,7 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -57,7 +57,8 @@ jobs:
           DEPLOY_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           gh release edit ${{ github.event.release.tag_name }} \
-            --notes "$(gh release view ${{ github.event.release.tag_name }} --json body --template '{{.body}}')
+            --repo ${{ github.repository }} \
+            --notes "$(gh release view ${{ github.event.release.tag_name }} --repo ${{ github.repository }} --json body --template '{{.body}}')
 
           ---
           🚀 **Live Demo:** [${{ steps.deployment.outputs.page_url }}](${{ steps.deployment.outputs.page_url }})"
