@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { themeManager } from '../utils/ThemeManager';
 
 export class UIScene extends Phaser.Scene {
     constructor() {
@@ -8,34 +9,30 @@ export class UIScene extends Phaser.Scene {
     init(data) {
         this.engine = data.engine;
         this.secondsElapsed = 0;
+        this.theme = themeManager.getTheme();
     }
 
     create() {
-        const { width } = this.cameras.main;
+        const { width, height } = this.scale;
 
-        // Mine Counter
+        // UI Container
+        this.uiContainer = this.add.container(0, 0);
+
+        // Mine Counter (Top Left)
         this.mineText = this.add.text(20, 20, `Mines: ${this.engine.getRemainingMines()}`, {
             fontSize: '24px',
             fill: '#ffffff',
             fontFamily: 'monospace'
         });
 
-        // Timer
+        // Timer (Top Right)
         this.timerText = this.add.text(width - 20, 20, 'Time: 000', {
             fontSize: '24px',
             fill: '#ffffff',
             fontFamily: 'monospace'
         }).setOrigin(1, 0);
 
-        // Status Text
-        this.statusText = this.add.text(width / 2, 80, '', {
-            fontSize: '32px',
-            fill: '#ffffff',
-            fontFamily: 'monospace',
-            fontWeight: 'bold'
-        }).setOrigin(0.5);
-
-        // Restart Button (Home icon placeholder)
+        // Menu Button (Top Center)
         this.restartBtn = this.add.text(width / 2, 20, '🏠 MENU', {
             fontSize: '20px',
             fill: '#ffffff',
@@ -49,6 +46,38 @@ export class UIScene extends Phaser.Scene {
             this.scene.start('MenuScene');
         });
 
+        // Game Over Overlay (Hidden initially)
+        this.overlay = this.add.container(0, 0).setVisible(false);
+        const dimmer = this.add.rectangle(0, 0, width, height, 0x000000, 0.7).setOrigin(0);
+        const modal = this.add.rectangle(width / 2, height / 2, 300, 200, 0x34495e).setOrigin(0.5);
+        this.statusText = this.add.text(width / 2, height / 2 - 40, '', {
+            fontSize: '32px',
+            fill: '#ffffff',
+            fontFamily: 'monospace',
+            fontWeight: 'bold'
+        }).setOrigin(0.5);
+        
+        this.statsText = this.add.text(width / 2, height / 2, '', {
+            fontSize: '18px',
+            fill: '#ffffff',
+            fontFamily: 'monospace'
+        }).setOrigin(0.5);
+
+        const playAgainBtn = this.add.text(width / 2, height / 2 + 50, 'PLAY AGAIN', {
+            fontSize: '20px',
+            fill: '#ffffff',
+            backgroundColor: '#27ae60',
+            padding: { x: 15, y: 8 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            this.scene.stop('GameScene');
+            this.scene.start('GameScene', { difficulty: this.engine.difficultyKey });
+        });
+
+        this.overlay.add([dimmer, modal, this.statusText, this.statsText, playAgainBtn]);
+
         // Listen for events from GameScene
         const gameScene = this.scene.get('GameScene');
         
@@ -57,20 +86,52 @@ export class UIScene extends Phaser.Scene {
         });
 
         gameScene.events.on('game-won', () => {
-            this.statusText.setText('YOU WIN! 😎');
-            this.statusText.setColor('#27ae60');
-            this.stopTimer();
+            this.showGameOver(true);
         });
 
         gameScene.events.on('game-lost', () => {
-            this.statusText.setText('GAME OVER 😵');
-            this.statusText.setColor('#e74c3c');
-            this.stopTimer();
+            this.showGameOver(false);
         });
 
-        // Start Timer on first reveal
         gameScene.events.once('update-mines', () => {
             this.startTimer();
+        });
+
+        // Handle Resize
+        this.scale.on('resize', this.handleResize, this);
+    }
+
+    handleResize(gameSize) {
+        const { width, height } = gameSize;
+        this.cameras.main.setViewport(0, 0, width, height);
+
+        this.mineText.setPosition(20, 20);
+        this.timerText.setPosition(width - 20, 20);
+        this.restartBtn.setPosition(width / 2, 20);
+
+        // Update Overlay
+        const dimmer = this.overlay.list[0];
+        const modal = this.overlay.list[1];
+        const playAgainBtn = this.overlay.list[4];
+
+        dimmer.setSize(width, height);
+        modal.setPosition(width / 2, height / 2);
+        this.statusText.setPosition(width / 2, height / 2 - 40);
+        this.statsText.setPosition(width / 2, height / 2);
+        playAgainBtn.setPosition(width / 2, height / 2 + 50);
+    }
+
+    showGameOver(won) {
+        this.stopTimer();
+        this.statusText.setText(won ? 'YOU WIN! 😎' : 'GAME OVER 😵');
+        this.statusText.setColor(won ? '#27ae60' : '#e74c3c');
+        this.statsText.setText(`Time: ${this.secondsElapsed}s\nMines: ${this.engine.mines}`);
+        this.overlay.setVisible(true);
+        this.overlay.setAlpha(0);
+        this.tweens.add({
+            targets: this.overlay,
+            alpha: 1,
+            duration: 500
         });
     }
 

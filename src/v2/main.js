@@ -5,12 +5,14 @@ import { MenuScene } from './scenes/MenuScene';
 import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 
+import { themeManager } from './utils/ThemeManager';
+
 const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
     parent: 'game-container',
-    backgroundColor: '#2c3e50',
+    backgroundColor: themeManager.getTheme().bg,
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH

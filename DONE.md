@@ -72,7 +72,7 @@
 - [x] Optimized code coverage by excluding debug utilities (reached 99% logic coverage).
 
 ## Phase 11: Layout Optimization (Landscape Mode) (Completed April 6, 2026)
-- [x] Swapped Expert difficulty dimensions from portrait (30x16) to landscape (16x30).
+- [x] Swapped Expert difficulty dimensions from portrait (30x16) to landscape (16x30)
 - [x] Updated `REQUIREMENTS.md` to reflect the new Expert preset (16x30).
 - [x] Adjusted integration tests to verify the 16x30 grid configuration.
 - [x] Verified that all tests pass with the new layout.
@@ -113,3 +113,18 @@
 - [x] Updated `README.md` to point to the new documentation paths.
 - [x] Verified project root is now cleaner and focused on current development.
 
+## Phase 17: V2 Animations, Audio & Mobile Interactions (Completed April 7, 2026)
+- [x] Implemented a robust Web Audio API-based `SoundManager` for synthesized SFX (reveal, flag, win, loss).
+- [x] Added a `scale` tween to `GameScene.js` for a satisfying tile reveal animation.
+- [x] Built performant Phaser 3 particle emitters for win (confetti burst) and loss (smoke explosion).
+- [x] Integrated mobile-first "long-press" touch controls (300ms) for flagging tiles.
+- [x] Added `navigator.vibrate` haptic feedback sequences for mobile devices.
+- [x] Verified zero regressions through Vitest test suite and Vite build.
+
+## Phase 18: V2 HUD, Screens & Viewport Optimization (Completed April 7, 2026)
+- [x] Implemented "Zero-Scroll" Mandate via dynamic board scaling in `GameScene.js`, ensuring Expert boards fit all viewports.
+- [x] Developed a centralized `ThemeManager` with "Classic" and "Dark" palettes.
+- [x] Refactored `UIScene.js` with responsive anchoring, anchoring HUD elements to screen edges during resize events.
+- [x] Added a high-fidelity Game Over overlay with statistics and "Play Again" functionality.
+- [x] Implemented an Interactive Tutorial modal in `MenuScene.js` explaining core mechanics.
+- [x] Locked the web viewport via CSS to prevent accidental browser scrolling and rubber-banding.
