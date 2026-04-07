@@ -29,15 +29,16 @@ export class Cell {
 
 export class MinesweeperEngine {
     constructor(difficultyKey = 'BEGINNER') {
+        this.difficultyKey = difficultyKey;  // #1: expose key for UIScene "Play Again"
         this.difficulty = DIFFICULTIES[difficultyKey];
         this.rows = this.difficulty.rows;
         this.cols = this.difficulty.cols;
         this.mineCount = this.difficulty.mines;
-        
+
         this.grid = [];
         this.state = GAME_STATES.NOT_STARTED;
         this.triggeredMineIndex = V2_CONFIG.ENGINE.EXCLUDE_DEFAULT;
-        
+
         this.init();
     }
 
@@ -46,10 +47,15 @@ export class MinesweeperEngine {
     }
 
     placeMines(excludeIndex = V2_CONFIG.ENGINE.EXCLUDE_DEFAULT) {
+        // #20: guard against impossible mine counts
+        if (this.mineCount >= this.grid.length) {
+            throw new Error(`Cannot place ${this.mineCount} mines in a grid of ${this.grid.length} cells.`);
+        }
+
         let placedMines = 0;
         while (placedMines < this.mineCount) {
             const randomIndex = Math.floor(Math.random() * this.grid.length);
-            
+
             if (randomIndex !== excludeIndex && !this.grid[randomIndex].isMine) {
                 this.grid[randomIndex].isMine = true;
                 placedMines++;
@@ -62,7 +68,7 @@ export class MinesweeperEngine {
     calculateAdjacency() {
         for (let i = 0; i < this.grid.length; i++) {
             if (this.grid[i].isMine) continue;
-            
+
             const neighbors = this.getNeighborsByIndex(i);
             this.grid[i].neighborMines = neighbors.filter(idx => this.grid[idx].isMine).length;
         }
@@ -89,6 +95,9 @@ export class MinesweeperEngine {
     }
 
     revealCell(startIndex) {
+        // #20: guard against out-of-bounds index
+        if (startIndex < 0 || startIndex >= this.grid.length) return [];
+
         if (this.state === GAME_STATES.WON || this.state === GAME_STATES.LOST) return [];
 
         if (this.state === GAME_STATES.NOT_STARTED) {
@@ -134,7 +143,7 @@ export class MinesweeperEngine {
 
     toggleMark(index) {
         if (this.state === GAME_STATES.WON || this.state === GAME_STATES.LOST) return;
-        
+
         const cell = this.grid[index];
         if (cell.isRevealed) return;
 

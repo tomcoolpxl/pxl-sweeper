@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { highscoreManager } from '../utils/HighscoreManager';
+import { soundManager } from '../utils/SoundManager';
 import { V2_CONFIG } from '../config';
 
 export class UIScene extends Phaser.Scene {
@@ -16,7 +17,6 @@ export class UIScene extends Phaser.Scene {
         const { width, height } = this.scale;
         const { UI, LAYOUT } = V2_CONFIG;
 
-        // UI Container
         this.uiContainer = this.add.container(0, 0);
 
         // Mine Counter (Top Left)
@@ -49,23 +49,37 @@ export class UIScene extends Phaser.Scene {
                 this.scene.start('MenuScene');
             });
 
+        // #18: Mute button (Top Right, before timer)
+        this.muteBtn = this.add.text(width - LAYOUT.UI_PADDING, LAYOUT.UI_PADDING + 34, soundManager.enabled ? '🔊' : '🔇', {
+            fontSize: '20px',
+            fill: UI.COLORS.WHITE,
+            backgroundColor: UI.COLORS.MENU_BG,
+            padding: { x: 10, y: 6 }
+        })
+            .setOrigin(1, 0)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                soundManager.enabled = !soundManager.enabled;
+                this.muteBtn.setText(soundManager.enabled ? '🔊' : '🔇');
+            });
+
         // Game Over Overlay
         this.overlay = this.add.container(0, 0).setVisible(false);
-        
-        // Semi-transparent dimmer that covers the screen but allows board to be seen
-        const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA)
+
+        // #4: store named references — never access by magic list index
+        this.dimmerRect = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA)
             .setOrigin(0)
-            .setInteractive(); // Blocks clicks to board
-        
-        const modal = this.add.rectangle(width / 2, height / 2, 400, 350, UI.MODAL.BG).setOrigin(0.5);
-        
+            .setInteractive();
+
+        this.modalRect = this.add.rectangle(width / 2, height / 2, UI.MODAL.WIDTH, 350, UI.MODAL.BG).setOrigin(0.5);
+
         this.statusText = this.add.text(width / 2, height / 2 - 100, '', {
             fontSize: '42px',
             fill: UI.COLORS.WHITE,
             fontFamily: 'monospace',
             fontWeight: 'bold'
         }).setOrigin(0.5);
-        
+
         this.statsText = this.add.text(width / 2, height / 2 - 30, '', {
             fontSize: '22px',
             fill: UI.COLORS.WHITE,
@@ -73,7 +87,7 @@ export class UIScene extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5);
 
-        const playAgainBtn = this.add.text(width / 2, height / 2 + 40, 'PLAY AGAIN', {
+        this.playAgainBtn = this.add.text(width / 2, height / 2 + 40, 'PLAY AGAIN', {
             fontSize: '24px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.WIN,
@@ -85,12 +99,13 @@ export class UIScene extends Phaser.Scene {
                 this.cameras.main.fadeOut(250, 0, 0, 0, (camera, progress) => {
                     if (progress === 1) {
                         this.scene.stop('GameScene');
+                        // #1: engine.difficultyKey now exists — correct difficulty used
                         this.scene.start('GameScene', { difficulty: this.engine.difficultyKey });
                     }
                 });
             });
 
-        const mainMenuBtn = this.add.text(width / 2, height / 2 + 100, 'MAIN MENU', {
+        this.mainMenuBtn = this.add.text(width / 2, height / 2 + 100, 'MAIN MENU', {
             fontSize: '20px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.BTN_BLUE,
@@ -103,7 +118,7 @@ export class UIScene extends Phaser.Scene {
                 this.scene.start('MenuScene');
             });
 
-        const reviewBtn = this.add.text(width / 2, height / 2 + 150, 'VIEW BOARD', {
+        this.reviewBtn = this.add.text(width / 2, height / 2 + 150, 'VIEW BOARD', {
             fontSize: '16px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.BTN_GREY,
@@ -113,15 +128,14 @@ export class UIScene extends Phaser.Scene {
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
                 this.overlay.setVisible(false);
-                // Re-show menu button in HUD if it was hidden
                 this.restartBtn.setVisible(true);
             });
 
-        this.overlay.add([dimmer, modal, this.statusText, this.statsText, playAgainBtn, mainMenuBtn, reviewBtn]);
+        this.overlay.add([this.dimmerRect, this.modalRect, this.statusText, this.statsText, this.playAgainBtn, this.mainMenuBtn, this.reviewBtn]);
 
         // Listen for events from GameScene
         const gameScene = this.scene.get('GameScene');
-        
+
         gameScene.events.on('update-mines', (count) => {
             this.mineText.setText(`Mines: ${count}`);
             this.updateA11y(`Mines remaining: ${count}`);
@@ -138,12 +152,16 @@ export class UIScene extends Phaser.Scene {
             this.updateA11y('You hit a mine. Game over.');
         });
 
+        // #17: relay keyboard focus announcements to screen reader
+        gameScene.events.on('update-focus', (message) => {
+            this.updateA11y(message);
+        });
+
         gameScene.events.once('update-mines', () => {
             this.startTimer();
             this.updateA11y('Game started.');
         });
 
-        // Handle Resize
         this.scale.on('resize', this.handleResize, this);
         this.updateA11y(`Minesweeper loaded. ${this.engine.getRemainingMines()} mines.`);
     }
@@ -155,6 +173,7 @@ export class UIScene extends Phaser.Scene {
         }
     }
 
+    // #4: use named references — no magic list indices
     handleResize(gameSize) {
         const { width, height } = gameSize;
         const { LAYOUT } = V2_CONFIG;
@@ -163,43 +182,38 @@ export class UIScene extends Phaser.Scene {
         this.mineText.setPosition(LAYOUT.UI_PADDING, LAYOUT.UI_PADDING);
         this.timerText.setPosition(width - LAYOUT.UI_PADDING, LAYOUT.UI_PADDING);
         this.restartBtn.setPosition(width / 2, LAYOUT.UI_PADDING);
+        this.muteBtn.setPosition(width - LAYOUT.UI_PADDING, LAYOUT.UI_PADDING + 34);
 
-        // Update Overlay
-        const dimmer = this.overlay.list[0];
-        const modal = this.overlay.list[1];
-        const playAgainBtn = this.overlay.list[4];
-        const mainMenuBtn = this.overlay.list[5];
-        const reviewBtn = this.overlay.list[6];
-
-        dimmer.setSize(width, height);
-        modal.setPosition(width / 2, height / 2);
+        this.dimmerRect.setSize(width, height);
+        this.modalRect.setPosition(width / 2, height / 2);
         this.statusText.setPosition(width / 2, height / 2 - 100);
         this.statsText.setPosition(width / 2, height / 2 - 30);
-        playAgainBtn.setPosition(width / 2, height / 2 + 40);
-        mainMenuBtn.setPosition(width / 2, height / 2 + 100);
-        reviewBtn.setPosition(width / 2, height / 2 + 150);
+        this.playAgainBtn.setPosition(width / 2, height / 2 + 40);
+        this.mainMenuBtn.setPosition(width / 2, height / 2 + 100);
+        this.reviewBtn.setPosition(width / 2, height / 2 + 150);
     }
 
     showGameOver(won, isNewRecord = false) {
         const { UI, TIMERS } = V2_CONFIG;
         this.stopTimer();
-        
+
         const scores = highscoreManager.getScores();
         const best = scores[this.engine.difficultyKey];
-        
+
         let status = won ? 'YOU WIN! 😎' : 'GAME OVER 😵';
         if (isNewRecord) status = 'NEW RECORD! 🏆';
-        
+
         this.statusText.setText(status);
         this.statusText.setColor(won ? UI.COLORS.WIN : UI.COLORS.LOSS);
-        
+
+        // #19: unified timer format — padded 3 digits with 's' suffix
         const stats = [
-            `TIME: ${this.secondsElapsed}s`,
-            `BEST: ${best ? best + 's' : '---'}`
+            `TIME: ${String(this.secondsElapsed).padStart(3, '0')}s`,
+            `BEST: ${best !== null ? String(best).padStart(3, '0') + 's' : '---'}`
         ].join('\n');
-        
+
         this.statsText.setText(stats);
-        
+
         this.overlay.setVisible(true);
         this.overlay.setAlpha(0);
         this.tweens.add({
@@ -215,6 +229,7 @@ export class UIScene extends Phaser.Scene {
             delay: V2_CONFIG.TIMERS.TIMER_INTERVAL_MS,
             callback: () => {
                 this.secondsElapsed++;
+                // #19: consistent padded format
                 this.timerText.setText(`Time: ${String(this.secondsElapsed).padStart(3, '0')}`);
             },
             loop: true

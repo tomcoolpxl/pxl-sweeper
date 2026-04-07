@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
-import { BootScene } from './scenes/BootScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { MenuScene } from './scenes/MenuScene';
 import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 import { V2_CONFIG } from './config';
+
+// #16: BootScene removed — PreloadScene is the entry point directly
 
 const config = {
     type: Phaser.AUTO,
@@ -17,7 +18,6 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: [
-        BootScene,
         PreloadScene,
         MenuScene,
         GameScene,

@@ -30,7 +30,7 @@ PXL Sweeper V2 is a high-fidelity, cross-platform Minesweeper game built with **
 *   **Long-Press (300ms)**: Toggle a flag on a hidden cell.
 *   **Haptic Feedback**: Trigger `navigator.vibrate` on flagging or mine explosion (if supported).
 *   **Pinch-to-Zoom**: Support zooming in on large boards (Expert) for precision play on small screens.
-*   **PWA**: The app shall include a `manifest.json` and Service Worker to be "Installable" as a Progressive Web App.
+*   ~~**PWA**: The app shall include a `manifest.json` and Service Worker to be "Installable" as a Progressive Web App.~~ **Removed**: PWA support intentionally removed to eliminate service worker complexity and caching issues.
 
 ### 4. Audio Engine
 The application shall provide high-quality SFX for:

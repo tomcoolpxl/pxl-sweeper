@@ -13,13 +13,13 @@ export class GameScene extends Phaser.Scene {
         this.engine = new MinesweeperEngine(this.difficultyKey);
         this.tiles = [];
         this.longPressTimer = null;
+        this.focusedIndex = 0;  // #17: keyboard navigation state
     }
 
     create() {
-        // Fix for shifting grid: Calculate scaling BEFORE creating any board elements
-        // and ensure we use the camera's base width/height.
         this.calculateScaling();
         this.createBoard();
+        this.setupKeyboard();  // #17: keyboard controls
 
         // Launch UI Scene
         this.scene.launch('UIScene', { engine: this.engine });
@@ -28,28 +28,26 @@ export class GameScene extends Phaser.Scene {
     calculateScaling() {
         const { width, height } = this.cameras.main;
         const { LAYOUT } = V2_CONFIG;
-        
-        // Safety: Use floor to avoid sub-pixel positioning which causes shifts
+
         const safeWidth = Math.floor(width * LAYOUT.MARGIN_PERCENT);
         const safeHeight = Math.floor((height - LAYOUT.HUD_HEIGHT) * LAYOUT.MARGIN_PERCENT);
 
         const tileW = (safeWidth / this.engine.cols) - LAYOUT.BASE_PADDING;
         const tileH = (safeHeight / this.engine.rows) - LAYOUT.BASE_PADDING;
-        
+
         this.tileSize = Math.floor(Math.min(tileW, tileH, LAYOUT.MAX_TILE_SIZE));
         this.padding = LAYOUT.BASE_PADDING;
 
         const boardWidth = this.engine.cols * (this.tileSize + this.padding);
         const boardHeight = this.engine.rows * (this.tileSize + this.padding);
 
-        // Explicitly floor these values to prevent canvas snapping
         this.startX = Math.floor((width - boardWidth) / 2 + (this.tileSize + this.padding) / 2);
         this.startY = Math.floor((height - boardHeight) / 2 + (this.tileSize + this.padding) / 2 + (LAYOUT.HUD_HEIGHT / LAYOUT.BOARD_OFFSET_Y_DIV));
     }
 
     createBoard() {
         const { UI } = V2_CONFIG;
-        
+
         for (let i = 0; i < this.engine.grid.length; i++) {
             const row = Math.floor(i / this.engine.cols);
             const col = i % this.engine.cols;
@@ -58,11 +56,10 @@ export class GameScene extends Phaser.Scene {
             const y = this.startY + row * (this.tileSize + this.padding);
 
             const tileContainer = this.add.container(x, y);
-            
-            // Background / Hidden State
+
             const bg = this.add.rectangle(0, 0, this.tileSize, this.tileSize, UI.COLORS.TILE_HIDDEN)
                 .setInteractive({ useHandCursor: true });
-            
+
             const text = this.add.text(0, 0, '', {
                 fontSize: `${Math.floor(this.tileSize * 0.6)}px`,
                 fontFamily: 'monospace',
@@ -73,7 +70,6 @@ export class GameScene extends Phaser.Scene {
             tileContainer.add([bg, text]);
             this.tiles[i] = { container: tileContainer, bg, text };
 
-            // Input handlers
             bg.on('pointerdown', (pointer) => {
                 if (this.engine.state === GAME_STATES.WON || this.engine.state === GAME_STATES.LOST) return;
 
@@ -96,6 +92,7 @@ export class GameScene extends Phaser.Scene {
                         this.longPressTimer.remove();
                         this.longPressTimer = null;
                         if (!tileContainer.getData('longPressed')) {
+                            this.setFocus(i);  // #17: sync keyboard focus to mouse click
                             this.handleLeftClick(i);
                         }
                     }
@@ -108,10 +105,56 @@ export class GameScene extends Phaser.Scene {
                     this.longPressTimer.remove();
                     this.longPressTimer = null;
                 }
+                tileContainer.setData('longPressed', false);  // #7: reset stale flag on pointer-out
             });
-
-            this.input.mouse.disableContextMenu();
         }
+
+        // #6: call once, outside the tile creation loop
+        this.input.mouse.disableContextMenu();
+    }
+
+    // #17: keyboard controls — arrow keys to navigate, Enter to reveal, Space to flag
+    setupKeyboard() {
+        this.input.keyboard.on('keydown-UP', () => this.moveFocus(-this.engine.cols));
+        this.input.keyboard.on('keydown-DOWN', () => this.moveFocus(this.engine.cols));
+        this.input.keyboard.on('keydown-LEFT', () => this.moveFocus(-1));
+        this.input.keyboard.on('keydown-RIGHT', () => this.moveFocus(1));
+        this.input.keyboard.on('keydown-ENTER', () => this.handleLeftClick(this.focusedIndex));
+        this.input.keyboard.on('keydown-SPACE', () => this.handleRightClick(this.focusedIndex));
+
+        // Show initial focus indicator
+        this.setFocus(0);
+    }
+
+    setFocus(index) {
+        if (index < 0 || index >= this.tiles.length) return;
+
+        // Remove old focus indicator
+        if (this.tiles[this.focusedIndex]) {
+            this.tiles[this.focusedIndex].bg.setStrokeStyle(0);
+        }
+
+        this.focusedIndex = index;
+        this.tiles[index].bg.setStrokeStyle(2, 0xffff00);
+
+        // Announce to screen reader via UIScene
+        const cell = this.engine.grid[index];
+        const row = Math.floor(index / this.engine.cols) + 1;
+        const col = (index % this.engine.cols) + 1;
+        this.events.emit('update-focus', `Row ${row}, column ${col}.${cell.isFlagged ? ' Flagged.' : ''}${cell.isRevealed && cell.neighborMines > 0 ? ` ${cell.neighborMines} adjacent mines.` : ''}`);
+    }
+
+    moveFocus(delta) {
+        if (this.engine.state === GAME_STATES.WON || this.engine.state === GAME_STATES.LOST) return;
+
+        const newIndex = this.focusedIndex + delta;
+        if (newIndex < 0 || newIndex >= this.engine.grid.length) return;
+
+        // Prevent wrapping at row boundaries for left/right movement
+        if (delta === 1 && newIndex % this.engine.cols === 0) return;
+        if (delta === -1 && this.focusedIndex % this.engine.cols === 0) return;
+
+        this.setFocus(newIndex);
     }
 
     handleLeftClick(index) {
@@ -120,7 +163,7 @@ export class GameScene extends Phaser.Scene {
         soundManager.playReveal();
         const revealedIndices = this.engine.revealCell(index);
         this.updateBoardUI(revealedIndices);
-        
+
         if (this.engine.state === GAME_STATES.WON) {
             soundManager.playWin();
             this.triggerWinParticles();
@@ -136,7 +179,7 @@ export class GameScene extends Phaser.Scene {
 
     handleRightClick(index) {
         if (this.engine.grid[index].isRevealed) return;
-        
+
         soundManager.playFlag();
         this.triggerHaptic(V2_CONFIG.HAPTICS.FLAG);
         this.engine.toggleMark(index);
@@ -145,13 +188,16 @@ export class GameScene extends Phaser.Scene {
 
     updateBoardUI(revealedIndices = []) {
         const { UI } = V2_CONFIG;
-        
+
+        // #5: O(1) lookup instead of O(n) Array.includes inside the loop
+        const revealedSet = new Set(revealedIndices);
+
         for (let i = 0; i < this.engine.grid.length; i++) {
             const cell = this.engine.grid[i];
             const tile = this.tiles[i];
 
             if (cell.isRevealed) {
-                if (revealedIndices.includes(i) && tile.bg.fillColor !== UI.COLORS.TILE_REVEALED) {
+                if (revealedSet.has(i) && tile.bg.fillColor !== UI.COLORS.TILE_REVEALED) {
                     this.tweens.add({
                         targets: tile.container,
                         scale: { from: 0.8, to: 1.0 },
@@ -198,7 +244,7 @@ export class GameScene extends Phaser.Scene {
             scale: { start: 2, end: 0 },
             lifespan: PARTICLES.WIN_LIFESPAN,
             quantity: PARTICLES.WIN_QUANTITY,
-            tint: [ 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff ]
+            tint: [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff]
         });
         emitter.explode(PARTICLES.WIN_QUANTITY);
     }
@@ -209,7 +255,7 @@ export class GameScene extends Phaser.Scene {
             speed: { min: PARTICLES.LOSS_SPEED_MIN, max: PARTICLES.LOSS_SPEED_MAX },
             angle: { min: 0, max: 360 },
             scale: { start: 3, end: 0 },
-            tint: [ 0xff0000, 0xff8800, 0x444444 ],
+            tint: [0xff0000, 0xff8800, 0x444444],
             lifespan: PARTICLES.LOSS_LIFESPAN,
             gravityY: PARTICLES.LOSS_GRAVITY_Y,
             blendMode: 'NORMAL'
