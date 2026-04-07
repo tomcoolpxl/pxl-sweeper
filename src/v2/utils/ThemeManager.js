@@ -8,6 +8,7 @@ export const THEMES = {
         text: 0xffffff,
         uiBg: 0x34495e,
         accent: 0x3498db,
+        flagColor: '#e74c3c',
         numberColors: [
             '#ffffff', // 0
             '#2980b9', // 1
@@ -29,6 +30,7 @@ export const THEMES = {
         text: 0xcccccc,
         uiBg: 0x222222,
         accent: 0x666666,
+        flagColor: '#ff4444',
         numberColors: [
             '#cccccc', // 0
             '#5dade2', // 1

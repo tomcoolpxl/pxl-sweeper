@@ -15,7 +15,7 @@ export class UIScene extends Phaser.Scene {
 
     create() {
         const { width, height } = this.scale;
-        const { UI, LAYOUT, TIMERS } = V2_CONFIG;
+        const { UI, LAYOUT } = V2_CONFIG;
 
         // UI Container
         this.uiContainer = this.add.container(0, 0);
@@ -50,23 +50,23 @@ export class UIScene extends Phaser.Scene {
 
         // Game Over Overlay (Hidden initially)
         this.overlay = this.add.container(0, 0).setVisible(false);
-        const dimmer = this.add.rectangle(0, 0, width, height, 0x000000, UI.MODAL.DIMMER_ALPHA).setOrigin(0);
+        const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.DIMMER, UI.MODAL.DIMMER_ALPHA).setOrigin(0);
         const modal = this.add.rectangle(width / 2, height / 2, UI.MODAL.WIDTH, UI.MODAL.HEIGHT, UI.MODAL.BG).setOrigin(0.5);
         
-        this.statusText = this.add.text(width / 2, height / 2 - 40, '', {
+        this.statusText = this.add.text(width / 2, height / 2 - UI.MODAL.STATUS_OFFSET_Y, '', {
             fontSize: '32px',
             fill: UI.COLORS.WHITE,
             fontFamily: 'monospace',
             fontWeight: 'bold'
         }).setOrigin(0.5);
         
-        this.statsText = this.add.text(width / 2, height / 2, '', {
+        this.statsText = this.add.text(width / 2, height / 2 - UI.MODAL.STATS_OFFSET_Y, '', {
             fontSize: '18px',
             fill: UI.COLORS.WHITE,
             fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        const playAgainBtn = this.add.text(width / 2, height / 2 + 30, 'PLAY AGAIN', {
+        const playAgainBtn = this.add.text(width / 2, height / 2 + UI.MODAL.PLAY_AGAIN_OFFSET_Y, 'PLAY AGAIN', {
             fontSize: '20px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.WIN,
@@ -79,7 +79,7 @@ export class UIScene extends Phaser.Scene {
             this.scene.start('GameScene', { difficulty: this.engine.difficultyKey });
         });
 
-        const mainMenuBtn = this.add.text(width / 2, height / 2 + 80, 'MAIN MENU', {
+        const mainMenuBtn = this.add.text(width / 2, height / 2 + UI.MODAL.MAIN_MENU_OFFSET_Y, 'MAIN MENU', {
             fontSize: '18px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.BTN_BLUE,
@@ -146,10 +146,10 @@ export class UIScene extends Phaser.Scene {
 
         dimmer.setSize(width, height);
         modal.setPosition(width / 2, height / 2);
-        this.statusText.setPosition(width / 2, height / 2 - 40);
-        this.statsText.setPosition(width / 2, height / 2);
-        playAgainBtn.setPosition(width / 2, height / 2 + 30);
-        mainMenuBtn.setPosition(width / 2, height / 2 + 80);
+        this.statusText.setPosition(width / 2, height / 2 - UI.MODAL.STATUS_OFFSET_Y);
+        this.statsText.setPosition(width / 2, height / 2 - UI.MODAL.STATS_OFFSET_Y);
+        playAgainBtn.setPosition(width / 2, height / 2 + UI.MODAL.PLAY_AGAIN_OFFSET_Y);
+        mainMenuBtn.setPosition(width / 2, height / 2 + UI.MODAL.MAIN_MENU_OFFSET_Y);
     }
 
     showGameOver(won) {

@@ -45,7 +45,7 @@ export class GameScene extends Phaser.Scene {
 
         // Center board
         this.startX = (width - boardWidth) / 2 + (this.tileSize + this.padding) / 2;
-        this.startY = (height - boardHeight) / 2 + (this.tileSize + this.padding) / 2 + (LAYOUT.HUD_HEIGHT / 4);
+        this.startY = (height - boardHeight) / 2 + (this.tileSize + this.padding) / 2 + (LAYOUT.HUD_HEIGHT / LAYOUT.BOARD_OFFSET_Y_DIV);
     }
 
     createBoard() {
@@ -173,7 +173,7 @@ export class GameScene extends Phaser.Scene {
                 }
             } else if (cell.isFlagged) {
                 tile.text.setText('🚩');
-                tile.text.setColor(this.theme.tileMine === 0xe74c3c ? V2_CONFIG.UI.COLORS.LOSS : '#ff4444');
+                tile.text.setColor(this.theme.flagColor);
             } else if (cell.isQuestionMarked) {
                 tile.text.setText('?');
                 tile.text.setColor(V2_CONFIG.UI.COLORS.WHITE);
@@ -196,7 +196,7 @@ export class GameScene extends Phaser.Scene {
         const { width, height } = this.cameras.main;
         const { PARTICLES } = V2_CONFIG.UI;
         const emitter = this.add.particles(width / 2, height / 2, 'particle_rect', {
-            speed: { min: 200, max: 400 },
+            speed: { min: PARTICLES.WIN_SPEED_MIN, max: PARTICLES.WIN_SPEED_MAX },
             angle: { min: 0, max: 360 },
             scale: { start: 2, end: 0 },
             lifespan: PARTICLES.WIN_LIFESPAN,
@@ -209,12 +209,12 @@ export class GameScene extends Phaser.Scene {
     triggerLossParticles(container) {
         const { PARTICLES } = V2_CONFIG.UI;
         const emitter = this.add.particles(container.x, container.y, 'particle_rect', {
-            speed: { min: 50, max: 150 },
+            speed: { min: PARTICLES.LOSS_SPEED_MIN, max: PARTICLES.LOSS_SPEED_MAX },
             angle: { min: 0, max: 360 },
             scale: { start: 3, end: 0 },
             tint: [ 0xff0000, 0xff8800, 0x444444 ],
             lifespan: PARTICLES.LOSS_LIFESPAN,
-            gravityY: -100,
+            gravityY: PARTICLES.LOSS_GRAVITY_Y,
             blendMode: 'NORMAL'
         });
         emitter.explode(PARTICLES.LOSS_QUANTITY);

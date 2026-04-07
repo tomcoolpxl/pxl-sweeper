@@ -1,3 +1,5 @@
+import { V2_CONFIG } from './config';
+
 /**
  * UI-agnostic Minesweeper Engine
  */
@@ -34,7 +36,7 @@ export class MinesweeperEngine {
         
         this.grid = [];
         this.state = GAME_STATES.NOT_STARTED;
-        this.triggeredMineIndex = -1;
+        this.triggeredMineIndex = V2_CONFIG.ENGINE.EXCLUDE_DEFAULT;
         
         this.init();
     }
@@ -43,7 +45,7 @@ export class MinesweeperEngine {
         this.grid = Array.from({ length: this.rows * this.cols }, () => new Cell());
     }
 
-    placeMines(excludeIndex = -1) {
+    placeMines(excludeIndex = V2_CONFIG.ENGINE.EXCLUDE_DEFAULT) {
         let placedMines = 0;
         while (placedMines < this.mineCount) {
             const randomIndex = Math.floor(Math.random() * this.grid.length);

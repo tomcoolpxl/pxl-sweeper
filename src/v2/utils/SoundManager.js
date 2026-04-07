@@ -10,90 +10,92 @@ class SoundManager {
     playReveal() {
         if (!this.enabled || !this.ctx) return;
         
-        // Throttle reveal sound for zero-expansion flood
+        const { SOUNDS, TIMERS } = V2_CONFIG;
         const now = Date.now();
-        if (now - this.lastRevealTime < V2_CONFIG.TIMERS.THROTTLE_REVEAL_SFX_MS) return;
+        if (now - this.lastRevealTime < TIMERS.THROTTLE_REVEAL_SFX_MS) return;
         this.lastRevealTime = now;
 
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(400, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.05);
+        osc.frequency.setValueAtTime(SOUNDS.REVEAL.FREQ_START, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(SOUNDS.REVEAL.FREQ_END, this.ctx.currentTime + SOUNDS.REVEAL.DURATION);
 
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+        gain.gain.setValueAtTime(SOUNDS.REVEAL.GAIN, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + SOUNDS.REVEAL.DURATION);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
 
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.05);
+        osc.stop(this.ctx.currentTime + SOUNDS.REVEAL.DURATION);
     }
 
     playFlag() {
         if (!this.enabled || !this.ctx) return;
 
+        const { SOUNDS } = V2_CONFIG;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(SOUNDS.FLAG.FREQ_START, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(SOUNDS.FLAG.FREQ_END, this.ctx.currentTime + SOUNDS.FLAG.DURATION);
 
-        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(SOUNDS.FLAG.GAIN, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + SOUNDS.FLAG.DURATION);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
 
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.1);
+        osc.stop(this.ctx.currentTime + SOUNDS.FLAG.DURATION);
     }
 
     playWin() {
         if (!this.enabled || !this.ctx) return;
 
-        const notes = [440, 554.37, 659.25, 880]; // A major arpeggio
-        notes.forEach((freq, i) => {
+        const { SOUNDS } = V2_CONFIG;
+        SOUNDS.WIN.NOTES.forEach((freq, i) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
 
             osc.type = 'square';
             osc.frequency.value = freq;
 
-            const time = this.ctx.currentTime + i * 0.1;
+            const time = this.ctx.currentTime + i * SOUNDS.WIN.SPACING;
             gain.gain.setValueAtTime(0, time);
-            gain.gain.linearRampToValueAtTime(0.1, time + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+            gain.gain.linearRampToValueAtTime(SOUNDS.WIN.GAIN, time + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + SOUNDS.WIN.DURATION);
 
             osc.connect(gain);
             gain.connect(this.ctx.destination);
 
             osc.start(time);
-            osc.stop(time + 0.2);
+            osc.stop(time + SOUNDS.WIN.DURATION);
         });
     }
 
     playLoss() {
         if (!this.enabled || !this.ctx) return;
 
+        const { SOUNDS } = V2_CONFIG;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(100, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 0.5);
+        osc.frequency.setValueAtTime(SOUNDS.LOSS.FREQ_START, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(SOUNDS.LOSS.FREQ_END, this.ctx.currentTime + SOUNDS.LOSS.DURATION);
 
-        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.5);
+        gain.gain.setValueAtTime(SOUNDS.LOSS.GAIN, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + SOUNDS.LOSS.DURATION);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
 
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.5);
+        osc.stop(this.ctx.currentTime + SOUNDS.LOSS.DURATION);
     }
 }
 

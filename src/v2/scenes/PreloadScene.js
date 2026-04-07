@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { V2_CONFIG } from '../config';
 
 export class PreloadScene extends Phaser.Scene {
     constructor() {
@@ -6,30 +7,40 @@ export class PreloadScene extends Phaser.Scene {
     }
 
     preload() {
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
+        const { width, height } = this.cameras.main;
+        const { PRELOAD, UI } = V2_CONFIG;
 
         // Loading bar UI
         const progressBar = this.add.graphics();
         const progressBox = this.add.graphics();
-        progressBox.fillStyle(0x222222, 0.8);
-        progressBox.fillRect(width / 2 - 160, height / 2 - 25, 320, 50);
+        progressBox.fillStyle(PRELOAD.BG_COLOR, PRELOAD.BG_ALPHA);
+        progressBox.fillRect(
+            width / 2 - PRELOAD.BAR_WIDTH / 2, 
+            height / 2 - PRELOAD.BAR_Y_OFFSET, 
+            PRELOAD.BAR_WIDTH, 
+            PRELOAD.BAR_HEIGHT
+        );
 
         const loadingText = this.make.text({
             x: width / 2,
-            y: height / 2 - 50,
+            y: height / 2 - PRELOAD.TEXT_Y_OFFSET,
             text: 'Loading...',
             style: {
                 font: '20px monospace',
-                fill: '#ffffff'
+                fill: UI.COLORS.WHITE
             }
         });
         loadingText.setOrigin(0.5, 0.5);
 
         this.load.on('progress', (value) => {
             progressBar.clear();
-            progressBar.fillStyle(0xffffff, 1);
-            progressBar.fillRect(width / 2 - 150, height / 2 - 15, 300 * value, 30);
+            progressBar.fillStyle(PRELOAD.BAR_COLOR, 1);
+            progressBar.fillRect(
+                width / 2 - PRELOAD.BAR_INNER_WIDTH / 2, 
+                height / 2 - (PRELOAD.BAR_INNER_HEIGHT / 2), 
+                PRELOAD.BAR_INNER_WIDTH * value, 
+                PRELOAD.BAR_INNER_HEIGHT
+            );
         });
 
         this.load.on('complete', () => {
@@ -37,19 +48,17 @@ export class PreloadScene extends Phaser.Scene {
             progressBox.destroy();
             loadingText.destroy();
         });
-
-        // Placeholder for assets
-        // this.load.image('tile', 'src/v2/assets/images/tile.png');
-        // this.load.audio('click', 'src/v2/assets/audio/click.mp3');
     }
 
     create() {
+        const { PRELOAD } = V2_CONFIG;
         // Generate common textures here to act as a dynamic atlas
         if (!this.textures.exists('particle_rect')) {
+            const size = PRELOAD.PARTICLE_TEXTURE_SIZE;
             const g = this.make.graphics({ x: 0, y: 0, add: false });
             g.fillStyle(0xffffff, 1);
-            g.fillRect(0, 0, 4, 4);
-            g.generateTexture('particle_rect', 4, 4);
+            g.fillRect(0, 0, size, size);
+            g.generateTexture('particle_rect', size, size);
         }
 
         this.scene.start('MenuScene');

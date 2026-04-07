@@ -12,7 +12,7 @@ export class MenuScene extends Phaser.Scene {
         const { UI } = V2_CONFIG;
         const theme = themeManager.getTheme();
 
-        this.add.text(width / 2, height / 4, 'PXL SWEEPER V2', {
+        this.add.text(width / 2, height / UI.MENU.TITLE_Y_DIV, 'PXL SWEEPER V2', {
             fontSize: '48px',
             fontFamily: 'monospace',
             fill: UI.COLORS.WHITE
@@ -36,16 +36,18 @@ export class MenuScene extends Phaser.Scene {
             return btn;
         };
 
-        const baseHeight = height * 0.45;
+        const baseHeight = height * UI.MENU.BTN_START_Y_PCT;
+        const spacing = UI.MENU.BTN_SPACING;
+        
         createButton(baseHeight, 'BEGINNER', () => this.scene.start('GameScene', { difficulty: 'BEGINNER' }));
-        createButton(baseHeight + 60, 'INTERMEDIATE', () => this.scene.start('GameScene', { difficulty: 'INTERMEDIATE' }));
-        createButton(baseHeight + 120, 'EXPERT', () => this.scene.start('GameScene', { difficulty: 'EXPERT' }));
+        createButton(baseHeight + spacing, 'INTERMEDIATE', () => this.scene.start('GameScene', { difficulty: 'INTERMEDIATE' }));
+        createButton(baseHeight + spacing * 2, 'EXPERT', () => this.scene.start('GameScene', { difficulty: 'EXPERT' }));
 
         // Tutorial Button
-        createButton(baseHeight + 200, 'TUTORIAL', () => this.showTutorial(), UI.COLORS.WIN);
+        createButton(baseHeight + spacing * 3.3, 'TUTORIAL', () => this.showTutorial(), UI.COLORS.WIN);
 
         // Theme Toggle Button
-        const themeBtn = createButton(height - 50, `THEME: ${theme.name}`, () => {
+        const themeBtn = createButton(height - UI.MENU.THEME_BTN_OFFSET_Y, `THEME: ${theme.name}`, () => {
             const newTheme = theme.name === 'Classic' ? 'DARK' : 'CLASSIC';
             themeManager.setTheme(newTheme);
             this.scene.restart();
@@ -60,7 +62,7 @@ export class MenuScene extends Phaser.Scene {
         const dimmer = this.add.rectangle(0, 0, width, height, 0x000000, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
         
         const modal = this.add.rectangle(width / 2, height / 2, UI.MODAL.TUTORIAL_WIDTH, UI.MODAL.TUTORIAL_HEIGHT, UI.MODAL.BG).setOrigin(0.5);
-        const title = this.add.text(width / 2, height / 2 - 140, 'HOW TO PLAY', {
+        const title = this.add.text(width / 2, height / 2 - UI.MODAL.TITLE_OFFSET_Y, 'HOW TO PLAY', {
             fontSize: '32px',
             fontFamily: 'monospace',
             fill: UI.COLORS.WHITE
@@ -81,7 +83,7 @@ export class MenuScene extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5);
 
-        const closeBtn = this.add.text(width / 2, height / 2 + 130, 'GOT IT!', {
+        const closeBtn = this.add.text(width / 2, height / 2 + UI.MODAL.CLOSE_BTN_OFFSET_Y, 'GOT IT!', {
             fontSize: '20px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.BTN_ORANGE,
