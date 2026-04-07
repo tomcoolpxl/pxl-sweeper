@@ -32,6 +32,23 @@ test.describe('V2 Minesweeper Game', () => {
         expect(await page.evaluate(() => window.game.scene.isActive('UIScene'))).toBe(true);
     });
 
+    test('should render padded HUD counters in the game scene', async ({ page }) => {
+        await page.waitForFunction(() => window.game.scene.getScene('MenuScene')?.beginnerBtn);
+        await page.evaluate(() => window.game.scene.getScene('MenuScene').beginnerBtn.emit('pointerdown'));
+        await page.waitForFunction(() => window.game.scene.isActive('UIScene'), { timeout: 5000 });
+
+        const hud = await page.evaluate(() => {
+            const ui = window.game.scene.getScene('UIScene');
+            return {
+                mines: ui.mineText.text,
+                timer: ui.timerText.text
+            };
+        });
+
+        expect(hud.mines).toBe('MINES 010');
+        expect(hud.timer).toBe('TIME 000');
+    });
+
     // #10: gameplay e2e tests
 
     test('should reveal a safe cell on first click', async ({ page }) => {

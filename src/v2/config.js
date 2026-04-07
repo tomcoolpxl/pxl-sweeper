@@ -1,12 +1,15 @@
 export const V2_CONFIG = {
     // Layout & Scaling
     LAYOUT: {
-        HUD_HEIGHT: 80,
+        HUD_HEIGHT: 108,
         BASE_PADDING: 2,
         MAX_TILE_SIZE: 32,
         MARGIN_PERCENT: 0.90,
         UI_PADDING: 20,
-        BOARD_OFFSET_Y_DIV: 4
+        BOARD_OFFSET_Y_DIV: 4,
+        SCENE_MARGIN: 28,
+        PLAYFIELD_PADDING: 24,
+        HUD_BAR_HEIGHT: 76
     },
     // Timers & Delays
     TIMERS: {
@@ -65,6 +68,7 @@ export const V2_CONFIG = {
             ACCENT_GOLD: 0xf4b942,
             ACCENT_RED: 0xff6b6b,
             ACCENT_GREEN: 0x4dd599,
+            FOCUS_YELLOW: 0xf4e285,
             BTN_BLUE: '#3498db',
             BTN_GREY: '#7f8c8d',
             BTN_ORANGE: '#e67e22',
@@ -72,10 +76,13 @@ export const V2_CONFIG = {
             BTN_HOVER: '#bdc3c7',
             BLACK: 0x000000,
             DIMMER: 0x000000,
-            BOARD_BG: 0x2c3e50,
-            TILE_HIDDEN: 0x95a5a6,
-            TILE_REVEALED: 0xbdc3c7,
+            BOARD_BG: 0x081522,
+            TILE_HIDDEN: 0x16314f,
+            TILE_HIDDEN_BORDER: 0x3b678b,
+            TILE_REVEALED: 0xcdd8e4,
+            TILE_REVEALED_BORDER: 0x8ba9c4,
             TILE_MINE: 0xe74c3c,
+            TILE_MINE_BORDER: 0xff9a9a,
             FLAG: '#e74c3c',
             NUMBERS: [
                 '#ffffff', // 0
