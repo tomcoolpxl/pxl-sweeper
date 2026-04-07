@@ -6,6 +6,7 @@
     "dev": "vite",
     "start": "vite",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src/js/*.js src/v2/*.js",

@@ -15,29 +15,30 @@ export class UIScene extends Phaser.Scene {
 
     create() {
         const { width, height } = this.scale;
+        const { UI, LAYOUT, TIMERS } = V2_CONFIG;
 
         // UI Container
         this.uiContainer = this.add.container(0, 0);
 
         // Mine Counter (Top Left)
-        this.mineText = this.add.text(20, 20, `Mines: ${this.engine.getRemainingMines()}`, {
+        this.mineText = this.add.text(LAYOUT.UI_PADDING, LAYOUT.UI_PADDING, `Mines: ${this.engine.getRemainingMines()}`, {
             fontSize: '24px',
-            fill: '#ffffff',
+            fill: UI.COLORS.WHITE,
             fontFamily: 'monospace'
         });
 
         // Timer (Top Right)
-        this.timerText = this.add.text(width - 20, 20, 'Time: 000', {
+        this.timerText = this.add.text(width - LAYOUT.UI_PADDING, LAYOUT.UI_PADDING, 'Time: 000', {
             fontSize: '24px',
-            fill: '#ffffff',
+            fill: UI.COLORS.WHITE,
             fontFamily: 'monospace'
         }).setOrigin(1, 0);
 
         // Menu Button (Top Center)
-        this.restartBtn = this.add.text(width / 2, 20, '🏠 MENU', {
+        this.restartBtn = this.add.text(width / 2, LAYOUT.UI_PADDING, '🏠 MENU', {
             fontSize: '20px',
-            fill: '#ffffff',
-            backgroundColor: '#34495e',
+            fill: UI.COLORS.WHITE,
+            backgroundColor: UI.COLORS.MENU_BG,
             padding: { x: 10, y: 5 }
         })
         .setOrigin(0.5, 0)
@@ -49,25 +50,26 @@ export class UIScene extends Phaser.Scene {
 
         // Game Over Overlay (Hidden initially)
         this.overlay = this.add.container(0, 0).setVisible(false);
-        const dimmer = this.add.rectangle(0, 0, width, height, 0x000000, 0.7).setOrigin(0);
-        const modal = this.add.rectangle(width / 2, height / 2, 300, 200, 0x34495e).setOrigin(0.5);
+        const dimmer = this.add.rectangle(0, 0, width, height, 0x000000, UI.MODAL.DIMMER_ALPHA).setOrigin(0);
+        const modal = this.add.rectangle(width / 2, height / 2, UI.MODAL.WIDTH, UI.MODAL.HEIGHT, UI.MODAL.BG).setOrigin(0.5);
+        
         this.statusText = this.add.text(width / 2, height / 2 - 40, '', {
             fontSize: '32px',
-            fill: '#ffffff',
+            fill: UI.COLORS.WHITE,
             fontFamily: 'monospace',
             fontWeight: 'bold'
         }).setOrigin(0.5);
         
         this.statsText = this.add.text(width / 2, height / 2, '', {
             fontSize: '18px',
-            fill: '#ffffff',
+            fill: UI.COLORS.WHITE,
             fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        const playAgainBtn = this.add.text(width / 2, height / 2 + 50, 'PLAY AGAIN', {
+        const playAgainBtn = this.add.text(width / 2, height / 2 + 30, 'PLAY AGAIN', {
             fontSize: '20px',
-            fill: '#ffffff',
-            backgroundColor: '#27ae60',
+            fill: UI.COLORS.WHITE,
+            backgroundColor: UI.COLORS.WIN,
             padding: { x: 15, y: 8 }
         })
         .setOrigin(0.5)
@@ -77,7 +79,20 @@ export class UIScene extends Phaser.Scene {
             this.scene.start('GameScene', { difficulty: this.engine.difficultyKey });
         });
 
-        this.overlay.add([dimmer, modal, this.statusText, this.statsText, playAgainBtn]);
+        const mainMenuBtn = this.add.text(width / 2, height / 2 + 80, 'MAIN MENU', {
+            fontSize: '18px',
+            fill: UI.COLORS.WHITE,
+            backgroundColor: UI.COLORS.BTN_BLUE,
+            padding: { x: 15, y: 8 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            this.scene.stop('GameScene');
+            this.scene.start('MenuScene');
+        });
+
+        this.overlay.add([dimmer, modal, this.statusText, this.statsText, playAgainBtn, mainMenuBtn]);
 
         // Listen for events from GameScene
         const gameScene = this.scene.get('GameScene');
@@ -116,42 +131,46 @@ export class UIScene extends Phaser.Scene {
 
     handleResize(gameSize) {
         const { width, height } = gameSize;
+        const { LAYOUT, UI } = V2_CONFIG;
         this.cameras.main.setViewport(0, 0, width, height);
 
-        this.mineText.setPosition(20, 20);
-        this.timerText.setPosition(width - 20, 20);
-        this.restartBtn.setPosition(width / 2, 20);
+        this.mineText.setPosition(LAYOUT.UI_PADDING, LAYOUT.UI_PADDING);
+        this.timerText.setPosition(width - LAYOUT.UI_PADDING, LAYOUT.UI_PADDING);
+        this.restartBtn.setPosition(width / 2, LAYOUT.UI_PADDING);
 
         // Update Overlay
         const dimmer = this.overlay.list[0];
         const modal = this.overlay.list[1];
         const playAgainBtn = this.overlay.list[4];
+        const mainMenuBtn = this.overlay.list[5];
 
         dimmer.setSize(width, height);
         modal.setPosition(width / 2, height / 2);
         this.statusText.setPosition(width / 2, height / 2 - 40);
         this.statsText.setPosition(width / 2, height / 2);
-        playAgainBtn.setPosition(width / 2, height / 2 + 50);
+        playAgainBtn.setPosition(width / 2, height / 2 + 30);
+        mainMenuBtn.setPosition(width / 2, height / 2 + 80);
     }
 
     showGameOver(won) {
+        const { UI, TIMERS } = V2_CONFIG;
         this.stopTimer();
         this.statusText.setText(won ? 'YOU WIN! 😎' : 'GAME OVER 😵');
-        this.statusText.setColor(won ? '#27ae60' : '#e74c3c');
-        this.statsText.setText(`Time: ${this.secondsElapsed}s\nMines: ${this.engine.mines}`);
+        this.statusText.setColor(won ? UI.COLORS.WIN : UI.COLORS.LOSS);
+        this.statsText.setText(`Time: ${this.secondsElapsed}s\nMines: ${this.engine.mineCount}`);
         this.overlay.setVisible(true);
         this.overlay.setAlpha(0);
         this.tweens.add({
             targets: this.overlay,
             alpha: 1,
-            duration: V2_CONFIG.TIMERS.GAMEOVER_FADE_MS
+            duration: TIMERS.GAMEOVER_FADE_MS
         });
     }
 
     startTimer() {
         if (this.timerEvent) return;
         this.timerEvent = this.time.addEvent({
-            delay: 1000,
+            delay: V2_CONFIG.TIMERS.TIMER_INTERVAL_MS,
             callback: () => {
                 this.secondsElapsed++;
                 this.timerText.setText(`Time: ${String(this.secondsElapsed).padStart(3, '0')}`);

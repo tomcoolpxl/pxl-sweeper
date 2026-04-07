@@ -136,3 +136,11 @@
 - [x] Centralized V2 magic numbers into `src/v2/config.js`.
 - [x] Refactored runtime texture generation to `PreloadScene.js` for future Texture Atlas scalability.
 - [x] Verified PWA offline functionality and verified E2E test passes.
+
+## Phase 20: Security, Infrastructure & UX Polish (Completed April 7, 2026)
+- [x] Performed `npm audit fix` and identified legacy peer dependency conflicts for PWA plugin.
+- [x] Integrated Playwright E2E tests into `package.json` with `test:e2e` script.
+- [x] Conducted a deep scan and refactored all remaining magic numbers into `V2_CONFIG`.
+- [x] Performed a comprehensive UX review and implemented flow improvements, including a "MAIN MENU" button on the Game Over overlay.
+- [x] Refined mobile haptics for more consistent touch feedback.
+- [x] Verified build and test integrity across both logic and E2E suites.

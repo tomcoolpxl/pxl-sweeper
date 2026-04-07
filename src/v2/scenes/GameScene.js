@@ -18,8 +18,6 @@ export class GameScene extends Phaser.Scene {
     }
 
     create() {
-        const { width, height } = this.cameras.main;
-        
         this.calculateScaling();
         this.createBoard();
 
@@ -29,24 +27,25 @@ export class GameScene extends Phaser.Scene {
 
     calculateScaling() {
         const { width, height } = this.cameras.main;
-        const hudHeight = V2_CONFIG.LAYOUT.HUD_HEIGHT;
-        const margin = V2_CONFIG.LAYOUT.MARGIN_PERCENT;
-        const availableWidth = width * margin;
-        const availableHeight = (height - hudHeight) * margin;
+        const { LAYOUT } = V2_CONFIG;
+        const availableWidth = width * LAYOUT.MARGIN_PERCENT;
+        const availableHeight = (height - LAYOUT.HUD_HEIGHT) * LAYOUT.MARGIN_PERCENT;
 
-        const basePadding = V2_CONFIG.LAYOUT.BASE_PADDING;
+        // Calculate required tile size to fit board in available space
+        const tileW = (availableWidth / this.engine.cols) - LAYOUT.BASE_PADDING;
+        const tileH = (availableHeight / this.engine.rows) - LAYOUT.BASE_PADDING;
         
-        const tileW = (availableWidth / this.engine.cols) - basePadding;
-        const tileH = (availableHeight / this.engine.rows) - basePadding;
-        
-        this.tileSize = Math.floor(Math.min(tileW, tileH, V2_CONFIG.LAYOUT.MAX_TILE_SIZE));
-        this.padding = basePadding;
+        // Use the smaller of the two to maintain square tiles
+        this.tileSize = Math.floor(Math.min(tileW, tileH, LAYOUT.MAX_TILE_SIZE));
+        this.padding = LAYOUT.BASE_PADDING;
 
+        // Calculate board dimensions
         const boardWidth = this.engine.cols * (this.tileSize + this.padding);
         const boardHeight = this.engine.rows * (this.tileSize + this.padding);
 
+        // Center board
         this.startX = (width - boardWidth) / 2 + (this.tileSize + this.padding) / 2;
-        this.startY = (height - boardHeight) / 2 + (this.tileSize + this.padding) / 2 + (hudHeight / 4);
+        this.startY = (height - boardHeight) / 2 + (this.tileSize + this.padding) / 2 + (LAYOUT.HUD_HEIGHT / 4);
     }
 
     createBoard() {
@@ -59,24 +58,27 @@ export class GameScene extends Phaser.Scene {
 
             const tileContainer = this.add.container(x, y);
             
+            // Background / Hidden State
             const bg = this.add.rectangle(0, 0, this.tileSize, this.tileSize, this.theme.tileHidden)
                 .setInteractive({ useHandCursor: true });
             
             const text = this.add.text(0, 0, '', {
                 fontSize: `${Math.floor(this.tileSize * 0.6)}px`,
                 fontFamily: 'monospace',
-                color: '#ffffff'
+                color: V2_CONFIG.UI.COLORS.WHITE
             }).setOrigin(0.5);
 
             tileContainer.add([bg, text]);
             this.tiles[i] = { container: tileContainer, bg, text };
 
+            // Input handlers
             bg.on('pointerdown', (pointer) => {
                 if (this.engine.state === GAME_STATES.WON || this.engine.state === GAME_STATES.LOST) return;
 
                 if (pointer.rightButtonDown()) {
                     this.handleRightClick(i);
                 } else {
+                    // Start long-press detection
                     this.longPressTimer = this.time.delayedCall(V2_CONFIG.TIMERS.LONG_PRESS_MS, () => {
                         this.handleRightClick(i);
                         this.longPressTimer = null;
@@ -90,12 +92,14 @@ export class GameScene extends Phaser.Scene {
 
                 if (!pointer.rightButtonDown()) {
                     if (this.longPressTimer) {
+                        // Short tap detected
                         this.longPressTimer.remove();
                         this.longPressTimer = null;
                         if (!tileContainer.getData('longPressed')) {
                             this.handleLeftClick(i);
                         }
                     }
+                    // Reset flag for next interaction
                     tileContainer.setData('longPressed', false);
                 }
             });
@@ -107,6 +111,7 @@ export class GameScene extends Phaser.Scene {
                 }
             });
 
+            // Prevent context menu
             this.input.mouse.disableContextMenu();
         }
     }
@@ -140,18 +145,18 @@ export class GameScene extends Phaser.Scene {
         this.updateBoardUI();
     }
 
-
     updateBoardUI(revealedIndices = []) {
         for (let i = 0; i < this.engine.grid.length; i++) {
             const cell = this.engine.grid[i];
             const tile = this.tiles[i];
 
             if (cell.isRevealed) {
+                // Animate newly revealed tiles
                 if (revealedIndices.includes(i) && tile.bg.fillColor !== this.theme.tileRevealed) {
                     this.tweens.add({
                         targets: tile.container,
                         scale: { from: 0.8, to: 1.0 },
-                        duration: 150,
+                        duration: V2_CONFIG.TIMERS.REVEAL_TWEEN_MS,
                         ease: 'Back.easeOut'
                     });
                 }
@@ -168,15 +173,16 @@ export class GameScene extends Phaser.Scene {
                 }
             } else if (cell.isFlagged) {
                 tile.text.setText('🚩');
-                tile.text.setColor(this.theme.tileMine === 0xe74c3c ? '#e74c3c' : '#ff4444');
+                tile.text.setColor(this.theme.tileMine === 0xe74c3c ? V2_CONFIG.UI.COLORS.LOSS : '#ff4444');
             } else if (cell.isQuestionMarked) {
                 tile.text.setText('?');
-                tile.text.setColor('#ffffff');
+                tile.text.setColor(V2_CONFIG.UI.COLORS.WHITE);
             } else {
                 tile.text.setText('');
             }
         }
         
+        // Notify UI scene about mine count change
         this.events.emit('update-mines', this.engine.getRemainingMines());
     }
 
@@ -188,27 +194,29 @@ export class GameScene extends Phaser.Scene {
 
     triggerWinParticles() {
         const { width, height } = this.cameras.main;
+        const { PARTICLES } = V2_CONFIG.UI;
         const emitter = this.add.particles(width / 2, height / 2, 'particle_rect', {
             speed: { min: 200, max: 400 },
             angle: { min: 0, max: 360 },
             scale: { start: 2, end: 0 },
-            lifespan: 3000,
-            quantity: 150,
+            lifespan: PARTICLES.WIN_LIFESPAN,
+            quantity: PARTICLES.WIN_QUANTITY,
             tint: [ 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff ]
         });
-        emitter.explode(150);
+        emitter.explode(PARTICLES.WIN_QUANTITY);
     }
 
     triggerLossParticles(container) {
+        const { PARTICLES } = V2_CONFIG.UI;
         const emitter = this.add.particles(container.x, container.y, 'particle_rect', {
             speed: { min: 50, max: 150 },
             angle: { min: 0, max: 360 },
             scale: { start: 3, end: 0 },
             tint: [ 0xff0000, 0xff8800, 0x444444 ],
-            lifespan: 800,
+            lifespan: PARTICLES.LOSS_LIFESPAN,
             gravityY: -100,
             blendMode: 'NORMAL'
         });
-        emitter.explode(50);
+        emitter.explode(PARTICLES.LOSS_QUANTITY);
     }
 }

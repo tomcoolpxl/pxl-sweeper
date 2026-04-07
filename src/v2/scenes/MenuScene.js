@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { themeManager } from '../utils/ThemeManager';
+import { V2_CONFIG } from '../config';
 
 export class MenuScene extends Phaser.Scene {
     constructor() {
@@ -8,58 +9,61 @@ export class MenuScene extends Phaser.Scene {
 
     create() {
         const { width, height } = this.cameras.main;
+        const { UI } = V2_CONFIG;
         const theme = themeManager.getTheme();
 
         this.add.text(width / 2, height / 4, 'PXL SWEEPER V2', {
             fontSize: '48px',
             fontFamily: 'monospace',
-            fill: '#ffffff'
+            fill: UI.COLORS.WHITE
         }).setOrigin(0.5);
 
-        const createButton = (y, label, callback, color = '#3498db') => {
+        const createButton = (y, label, callback, color = UI.COLORS.BTN_BLUE) => {
             const btn = this.add.text(width / 2, y, label, {
                 fontSize: '24px',
                 fontFamily: 'monospace',
                 fill: color,
-                backgroundColor: '#ecf0f1',
+                backgroundColor: UI.COLORS.BTN_BG,
                 padding: { x: 20, y: 10 }
             })
             .setOrigin(0.5)
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', callback);
 
-            btn.on('pointerover', () => btn.setStyle({ backgroundColor: '#bdc3c7' }));
-            btn.on('pointerout', () => btn.setStyle({ backgroundColor: '#ecf0f1' }));
+            btn.on('pointerover', () => btn.setStyle({ backgroundColor: UI.COLORS.BTN_HOVER }));
+            btn.on('pointerout', () => btn.setStyle({ backgroundColor: UI.COLORS.BTN_BG }));
             
             return btn;
         };
 
-        createButton(height * 0.45, 'BEGINNER', () => this.scene.start('GameScene', { difficulty: 'BEGINNER' }));
-        createButton(height * 0.45 + 60, 'INTERMEDIATE', () => this.scene.start('GameScene', { difficulty: 'INTERMEDIATE' }));
-        createButton(height * 0.45 + 120, 'EXPERT', () => this.scene.start('GameScene', { difficulty: 'EXPERT' }));
+        const baseHeight = height * 0.45;
+        createButton(baseHeight, 'BEGINNER', () => this.scene.start('GameScene', { difficulty: 'BEGINNER' }));
+        createButton(baseHeight + 60, 'INTERMEDIATE', () => this.scene.start('GameScene', { difficulty: 'INTERMEDIATE' }));
+        createButton(baseHeight + 120, 'EXPERT', () => this.scene.start('GameScene', { difficulty: 'EXPERT' }));
 
         // Tutorial Button
-        createButton(height * 0.45 + 200, 'TUTORIAL', () => this.showTutorial(), '#27ae60');
+        createButton(baseHeight + 200, 'TUTORIAL', () => this.showTutorial(), UI.COLORS.WIN);
 
         // Theme Toggle Button
         const themeBtn = createButton(height - 50, `THEME: ${theme.name}`, () => {
             const newTheme = theme.name === 'Classic' ? 'DARK' : 'CLASSIC';
             themeManager.setTheme(newTheme);
             this.scene.restart();
-        }, '#7f8c8d');
+        }, UI.COLORS.BTN_GREY);
         themeBtn.setFontSize('16px');
     }
 
     showTutorial() {
         const { width, height } = this.scale;
+        const { UI } = V2_CONFIG;
         const overlay = this.add.container(0, 0);
-        const dimmer = this.add.rectangle(0, 0, width, height, 0x000000, 0.8).setOrigin(0).setInteractive();
+        const dimmer = this.add.rectangle(0, 0, width, height, 0x000000, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
         
-        const modal = this.add.rectangle(width / 2, height / 2, 500, 350, 0x34495e).setOrigin(0.5);
+        const modal = this.add.rectangle(width / 2, height / 2, UI.MODAL.TUTORIAL_WIDTH, UI.MODAL.TUTORIAL_HEIGHT, UI.MODAL.BG).setOrigin(0.5);
         const title = this.add.text(width / 2, height / 2 - 140, 'HOW TO PLAY', {
             fontSize: '32px',
             fontFamily: 'monospace',
-            fill: '#ffffff'
+            fill: UI.COLORS.WHITE
         }).setOrigin(0.5);
 
         const steps = [
@@ -73,14 +77,14 @@ export class MenuScene extends Phaser.Scene {
         const content = this.add.text(width / 2, height / 2, steps.join('\n\n'), {
             fontSize: '18px',
             fontFamily: 'monospace',
-            fill: '#ffffff',
+            fill: UI.COLORS.WHITE,
             align: 'center'
         }).setOrigin(0.5);
 
         const closeBtn = this.add.text(width / 2, height / 2 + 130, 'GOT IT!', {
             fontSize: '20px',
-            fill: '#ffffff',
-            backgroundColor: '#e67e22',
+            fill: UI.COLORS.WHITE,
+            backgroundColor: UI.COLORS.BTN_ORANGE,
             padding: { x: 20, y: 10 }
         })
         .setOrigin(0.5)
