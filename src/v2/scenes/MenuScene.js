@@ -16,12 +16,15 @@ export class MenuScene extends Phaser.Scene {
         this.createBackdrop(width, height, layout);
 
         const menuContainer = this.add.container(width / 2, height * UI.MENU.CONTAINER_Y_PCT);
+        const heroPanel = this.createHeroPanel(layout);
+        const titleLockup = this.createTitleLockup(layout);
+        menuContainer.add(heroPanel);
+        menuContainer.add(titleLockup);
+        const cards = this.createDifficultyCards(menuContainer, layout);
+        const utilityButtons = this.createUtilityButtons(menuContainer, layout);
+        const footer = this.createFooterCopy(menuContainer, layout);
 
-        menuContainer.add(this.createHeroPanel(layout));
-        menuContainer.add(this.createTitleLockup(layout));
-        this.createDifficultyCards(menuContainer, layout);
-        this.createUtilityButtons(menuContainer, layout);
-        this.createFooterCopy(menuContainer, layout);
+        this.animateMenuEntrance([heroPanel, titleLockup, ...cards, ...utilityButtons, footer]);
     }
 
     getMenuLayout(width, height) {
@@ -178,6 +181,7 @@ export class MenuScene extends Phaser.Scene {
             { label: 'INTERMEDIATE', difficulty: 'INTERMEDIATE', accent: V2_CONFIG.UI.COLORS.ACCENT_GOLD, accentText: '#ffd979', meta: ['16 x 16 GRID', '40 MINES'], subtitle: 'Balanced pressure, tighter reads.', name: 'intermediateBtn' },
             { label: 'EXPERT', difficulty: 'EXPERT', accent: V2_CONFIG.UI.COLORS.ACCENT_RED, accentText: '#ff9a9a', meta: ['16 x 30 GRID', '99 MINES'], subtitle: 'High density. No wasted moves.', name: 'expertBtn' }
         ];
+        const createdCards = [];
 
         cards.forEach((card, index) => {
             const topY = layout.cardsTopY;
@@ -190,8 +194,12 @@ export class MenuScene extends Phaser.Scene {
             const x = startX + col * (layout.cardWidth + layout.cardGap);
             const y = topY + row * rowHeight;
 
-            menuContainer.add(this.createDifficultyCard(x, y, layout.cardWidth, layout.cardHeight, card, layout));
+            const createdCard = this.createDifficultyCard(x, y, layout.cardWidth, layout.cardHeight, card, layout);
+            menuContainer.add(createdCard);
+            createdCards.push(createdCard);
         });
+
+        return createdCards;
     }
 
     createDifficultyCard(x, y, width, height, options, layout) {
@@ -314,13 +322,16 @@ export class MenuScene extends Phaser.Scene {
                 name: 'howToBtn'
             }
         ];
+        const createdButtons = [];
 
         if (layout.isCompact) {
             const firstCenterY = layout.utilityCenterY;
             utilityButtons.forEach((button, index) => {
-                menuContainer.add(this.createUtilityButton(0, firstCenterY + index * (V2_CONFIG.UI.MENU.UTILITY_HEIGHT + layout.utilityGap), layout.utilityWidth, button));
+                const createdButton = this.createUtilityButton(0, firstCenterY + index * (V2_CONFIG.UI.MENU.UTILITY_HEIGHT + layout.utilityGap), layout.utilityWidth, button);
+                menuContainer.add(createdButton);
+                createdButtons.push(createdButton);
             });
-            return;
+            return createdButtons;
         }
 
         const baseY = layout.utilityCenterY;
@@ -329,8 +340,12 @@ export class MenuScene extends Phaser.Scene {
         const startX = -totalWidth / 2 + layout.utilityWidth / 2;
 
         utilityButtons.forEach((button, index) => {
-            menuContainer.add(this.createUtilityButton(startX + index * (layout.utilityWidth + layout.utilityGap), baseY, layout.utilityWidth, button));
+            const createdButton = this.createUtilityButton(startX + index * (layout.utilityWidth + layout.utilityGap), baseY, layout.utilityWidth, button);
+            menuContainer.add(createdButton);
+            createdButtons.push(createdButton);
         });
+
+        return createdButtons;
     }
 
     createUtilityButton(x, y, width, options) {
@@ -404,6 +419,7 @@ export class MenuScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         menuContainer.add(footer);
+        return footer;
     }
 
     showTutorial() {
@@ -429,6 +445,7 @@ export class MenuScene extends Phaser.Scene {
         const closeBtn = this.createModalButton(width / 2, height / 2 + 148, 160, 'GOT IT', UI.COLORS.ACCENT_GREEN, () => overlay.destroy());
 
         overlay.add([content, closeBtn]);
+        this.animateModalEntrance(overlay);
     }
 
     showHighscores() {
@@ -483,6 +500,7 @@ export class MenuScene extends Phaser.Scene {
         const closeBtn = this.createModalButton(width / 2, height / 2 + 174, 150, 'CLOSE', UI.COLORS.ACCENT_CYAN, () => overlay.destroy());
 
         overlay.add([content, clearBtn, closeBtn]);
+        this.animateModalEntrance(overlay);
     }
 
     // #8: in-game confirmation modal — replaces blocking window.confirm()
@@ -505,6 +523,7 @@ export class MenuScene extends Phaser.Scene {
         const noBtn = this.createModalButton(width / 2 + 78, height / 2 + 58, 120, 'NO', UI.COLORS.ACCENT_CYAN, () => overlay.destroy());
 
         overlay.add([text, yesBtn, noBtn]);
+        this.animateModalEntrance(overlay);
     }
 
     createModalShell(width, height, panelWidth, panelHeight, titleText) {
@@ -582,5 +601,33 @@ export class MenuScene extends Phaser.Scene {
 
         button.add([shell, labelText, hitZone]);
         return button;
+    }
+
+    animateMenuEntrance(items) {
+        items.forEach((item, index) => {
+            item.setAlpha(0);
+            item.y += index < 2 ? 16 : 22;
+            this.tweens.add({
+                targets: item,
+                alpha: 1,
+                y: item.y - (index < 2 ? 16 : 22),
+                duration: 260,
+                delay: index * 45,
+                ease: 'Cubic.easeOut'
+            });
+        });
+    }
+
+    animateModalEntrance(overlay) {
+        overlay.setAlpha(0);
+        overlay.setScale(0.97);
+        this.tweens.add({
+            targets: overlay,
+            alpha: 1,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 170,
+            ease: 'Cubic.easeOut'
+        });
     }
 }

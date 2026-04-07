@@ -12,6 +12,7 @@ export class GameScene extends Phaser.Scene {
         this.difficultyKey = data.difficulty || 'BEGINNER';
         this.engine = new MinesweeperEngine(this.difficultyKey);
         this.tiles = [];
+        this.playfieldElements = [];
         this.longPressTimer = null;
         this.focusedIndex = 0;
         this.keyboardActive = false;  // #17: keyboard nav is opt-in — must press an arrow key first
@@ -93,6 +94,7 @@ export class GameScene extends Phaser.Scene {
         frame.fillRoundedRect(this.playfieldX + 24, this.playfieldY + 22, Math.min(this.playfieldWidth * 0.26, 180), 5, 3);
         frame.fillStyle(UI.COLORS.ACCENT_GOLD, 0.75);
         frame.fillRoundedRect(this.playfieldX + 24, this.playfieldY + 34, Math.min(this.playfieldWidth * 0.14, 96), 3, 2);
+        this.playfieldFrame = frame;
     }
 
     createBoard() {
@@ -123,6 +125,7 @@ export class GameScene extends Phaser.Scene {
 
             tileContainer.add([shadow, bg, accent, text]);
             this.tiles[i] = { container: tileContainer, shadow, bg, accent, text };
+            this.playfieldElements.push(tileContainer);
 
             bg.on('pointerdown', (pointer) => {
                 if (this.engine.state === GAME_STATES.WON || this.engine.state === GAME_STATES.LOST) return;
@@ -170,6 +173,7 @@ export class GameScene extends Phaser.Scene {
 
         // #6: call once, outside the tile creation loop
         this.input.mouse.disableContextMenu();
+        this.animatePlayfieldEntrance();
     }
 
     // #17: keyboard controls — arrow keys activate keyboard mode; Enter/Space only work after first arrow key press
@@ -366,5 +370,32 @@ export class GameScene extends Phaser.Scene {
             blendMode: 'NORMAL'
         });
         emitter.explode(PARTICLES.LOSS_QUANTITY);
+    }
+
+    animatePlayfieldEntrance() {
+        if (this.playfieldFrame) {
+            this.playfieldFrame.setAlpha(0);
+            this.playfieldFrame.y += 10;
+            this.tweens.add({
+                targets: this.playfieldFrame,
+                alpha: 1,
+                y: this.playfieldFrame.y - 10,
+                duration: 240,
+                ease: 'Cubic.easeOut'
+            });
+        }
+
+        this.playfieldElements.forEach((tile, index) => {
+            tile.setAlpha(0);
+            tile.y += 8;
+            this.tweens.add({
+                targets: tile,
+                alpha: 1,
+                y: tile.y - 8,
+                duration: 180,
+                delay: Math.min(index * 4, 180),
+                ease: 'Cubic.easeOut'
+            });
+        });
     }
 }

@@ -80,6 +80,7 @@ export class UIScene extends Phaser.Scene {
         });
 
         this.overlay.add([this.statusText, this.statsText, this.playAgainBtn, this.mainMenuBtn, this.reviewBtn]);
+        this.animateHudEntrance();
 
         // Listen for events from GameScene
         const gameScene = this.scene.get('GameScene');
@@ -387,5 +388,31 @@ export class UIScene extends Phaser.Scene {
 
         button.add([shell, text, hitZone]);
         return button;
+    }
+
+    animateHudEntrance() {
+        const elements = [
+            this.hudChrome,
+            this.minePanel,
+            this.soundPanel,
+            this.timerPanel,
+            this.mineText,
+            this.timerText,
+            this.restartBtn,
+            this.muteBtn
+        ];
+
+        elements.forEach((element, index) => {
+            element.setAlpha(0);
+            element.y += 8;
+            this.tweens.add({
+                targets: element,
+                alpha: 1,
+                y: element.y - 8,
+                duration: 180,
+                delay: index * 30,
+                ease: 'Cubic.easeOut'
+            });
+        });
     }
 }
