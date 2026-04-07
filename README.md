@@ -1,52 +1,56 @@
-# PXL Sweeper
+# PXL Sweeper V2
 
-A modern, minimalist Minesweeper clone built with vanilla JavaScript, CSS Grid, and zero external dependencies.
+A cross-platform Minesweeper game built with **Phaser 3** (WebGL/Canvas). Supports mouse, touch, and keyboard input with particle effects, Web Audio sound, and persistent highscores.
 
 ## Features
 
-- **Three Difficulty Levels**:
-  - Beginner: 9x9 board, 10 mines
-  - Intermediate: 16x16 board, 40 mines
-  - Expert: 30x16 board, 99 mines
-- **First-Click Safety**: Your first reveal will never be a mine.
-- **Zero-Expansion**: Clicking a cell with no neighboring mines automatically reveals the entire connected area.
-- **Marking System**: Right-click to cycle through Flag (🚩), Question Mark (?), and Unmarked states.
-- **Real-time HUD**: Includes a timer and a mine counter that updates based on flags placed.
-- **Enhanced Visual Feedback**: Distinct styling for triggered mines, hidden mines, and incorrect flags on game loss.
-- **Modern UI**: Clean design with smooth reveal animations and responsive grid centering.
+- **Three Difficulty Levels**: Beginner (9×9, 10 mines), Intermediate (16×16, 40 mines), Expert (16×30, 99 mines)
+- **Guaranteed Safe Opening**: First click always lands on a blank cell — the clicked tile and all 8 neighbours are mine-free, so flood-fill always opens an area
+- **Zero-Scroll Layout**: Board scales to fit any viewport; no scrolling required
+- **Mouse, Touch & Keyboard**: Left/right click, long-press to flag on mobile, full arrow-key + Enter/Space keyboard navigation
+- **Sound Effects**: Web Audio API — reveal, flag, win fanfare, loss rumble; mute toggle in HUD
+- **Particle Effects**: Confetti on win, fire burst at the triggered mine on loss
+- **Highscores**: Best times per difficulty persisted to `localStorage`, with new-record detection
+- **Accessibility**: `aria-live` region announces game state; full keyboard play after pressing any arrow key
 
 ## How to Play
 
-1. **Left-Click**: Reveal a cell. If it's a mine, the game is over. If it's a number, it shows how many mines are in the 8 adjacent cells.
-2. **Right-Click**: Mark a cell with a flag (🚩) if you think there's a mine, or a question mark (?) if you're unsure.
-3. **Win**: Reveal all non-mine cells to win.
-4. **Loss**: Clicking a mine ends the game. All remaining mines will be revealed.
+| Input | Action |
+|---|---|
+| Left-click / Tap | Reveal a cell |
+| Right-click / Long-press (300 ms) | Flag / unflag a cell |
+| Arrow keys | Navigate board (activates keyboard mode) |
+| Enter | Reveal focused cell |
+| Space | Flag focused cell |
 
-## Technical Details
+Reveal all non-mine cells to win. Clicking a mine ends the game.
 
-- **Language**: JavaScript (ES6+)
-- **Styling**: CSS3 (CSS Grid, Flexbox, Custom Variables, Animations)
-- **Structure**: Vanilla HTML5
-- **Engine**: Custom iterative flood-fill algorithm for expansion logic.
-- **Debug Mode**: Add `?debug` to the URL to enable console-based board visualization.
+## Local Development
 
-## Compatibility
-
-Optimized for modern Chromium-based desktop browsers (Chrome, Edge, etc.).
-
-## Development & Quality Assurance
-
-This project follows senior engineering standards with a focus on automated quality control and continuous delivery.
-
-- **[Requirements](REQUIREMENTS.md)**: Detailed functional and technical specifications.
-- **[Testing Strategy](TESTING_STRATEGY.md)**: Infrastructure and test map for the Vitest suite.
-- **[CI/CD Strategy](CICD.md)**: Documentation for our automated GitHub Actions pipeline.
-- **[Code Review](docs/history/CODE_REVIEW.md)**: Architectural audit and quality assessment.
-
-### Local Development Commands
 ```bash
-npm install     # Install dev dependencies
-npm start       # Start a local development server
-npm test        # Run all unit and integration tests
-npm run lint    # Check code style with ESLint
+npm install          # install dependencies
+npm start            # start dev server at http://localhost:5173
+npm test             # run Vitest unit tests
+npm run test:e2e     # run Playwright e2e tests
+npm run test:coverage  # coverage report
+npm run lint         # ESLint
+npm run build        # production build
 ```
+
+## Tech Stack
+
+| Concern | Tool |
+|---|---|
+| Renderer | Phaser 3 (WebGL / Canvas fallback) |
+| Build | Vite 6 |
+| Unit tests | Vitest + jsdom |
+| E2E tests | Playwright |
+| Lint | ESLint |
+| Audio | Web Audio API (no external files) |
+| Storage | localStorage |
+
+## Project Docs
+
+- [`REQUIREMENTS_V2.md`](REQUIREMENTS_V2.md) — full functional specification
+- [`CODE_REVIEW.md`](CODE_REVIEW.md) — architectural audit and quality assessment
+- [`GEMINI.md`](GEMINI.md) — project workflow rules
