@@ -42,12 +42,12 @@ export class UIScene extends Phaser.Scene {
             backgroundColor: UI.COLORS.MENU_BG,
             padding: { x: 10, y: 5 }
         })
-        .setOrigin(0.5, 0)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-            this.scene.stop('GameScene');
-            this.scene.start('MenuScene');
-        });
+            .setOrigin(0.5, 0)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.scene.stop('GameScene');
+                this.scene.start('MenuScene');
+            });
 
         // Game Over Overlay (Hidden initially)
         this.overlay = this.add.container(0, 0).setVisible(false);
@@ -74,16 +74,16 @@ export class UIScene extends Phaser.Scene {
             backgroundColor: UI.COLORS.WIN,
             padding: { x: 20, y: 10 }
         })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-            this.cameras.main.fadeOut(250, 0, 0, 0, (camera, progress) => {
-                if (progress === 1) {
-                    this.scene.stop('GameScene');
-                    this.scene.start('GameScene', { difficulty: this.engine.difficultyKey });
-                }
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.cameras.main.fadeOut(250, 0, 0, 0, (camera, progress) => {
+                    if (progress === 1) {
+                        this.scene.stop('GameScene');
+                        this.scene.start('GameScene', { difficulty: this.engine.difficultyKey });
+                    }
+                });
             });
-        });
 
         const mainMenuBtn = this.add.text(width / 2, height / 2 + UI.MODAL.MAIN_MENU_OFFSET_Y, 'MAIN MENU', {
             fontSize: '18px',
@@ -91,12 +91,12 @@ export class UIScene extends Phaser.Scene {
             backgroundColor: UI.COLORS.BTN_BLUE,
             padding: { x: 15, y: 8 }
         })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-            this.scene.stop('GameScene');
-            this.scene.start('MenuScene');
-        });
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.scene.stop('GameScene');
+                this.scene.start('MenuScene');
+            });
 
         this.overlay.add([dimmer, modal, this.statusText, this.statsText, playAgainBtn, mainMenuBtn]);
 

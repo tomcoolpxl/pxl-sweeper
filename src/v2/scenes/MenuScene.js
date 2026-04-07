@@ -27,9 +27,9 @@ export class MenuScene extends Phaser.Scene {
                 backgroundColor: UI.COLORS.BTN_BG,
                 padding: { x: 20, y: 10 }
             })
-            .setOrigin(0.5)
-            .setInteractive({ useHandCursor: true })
-            .on('pointerdown', callback);
+                .setOrigin(0.5)
+                .setInteractive({ useHandCursor: true })
+                .on('pointerdown', callback);
 
             btn.on('pointerover', () => btn.setStyle({ backgroundColor: UI.COLORS.BTN_HOVER }));
             btn.on('pointerout', () => btn.setStyle({ backgroundColor: UI.COLORS.BTN_BG }));
@@ -93,9 +93,9 @@ export class MenuScene extends Phaser.Scene {
             backgroundColor: UI.COLORS.BTN_ORANGE,
             padding: { x: 20, y: 10 }
         })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => overlay.destroy());
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => overlay.destroy());
 
         overlay.add([dimmer, modal, title, content, closeBtn]);
     }
@@ -133,15 +133,15 @@ export class MenuScene extends Phaser.Scene {
             backgroundColor: UI.COLORS.LOSS,
             padding: { x: 10, y: 5 }
         })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-            if (confirm('Clear all scores?')) {
-                highscoreManager.clearScores();
-                overlay.destroy();
-                this.showHighscores();
-            }
-        });
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                if (confirm('Clear all scores?')) {
+                    highscoreManager.clearScores();
+                    overlay.destroy();
+                    this.showHighscores();
+                }
+            });
 
         const closeBtn = this.add.text(width / 2, height / 2 + 110, 'CLOSE', {
             fontSize: '20px',
@@ -149,9 +149,9 @@ export class MenuScene extends Phaser.Scene {
             backgroundColor: UI.COLORS.BTN_BLUE,
             padding: { x: 20, y: 10 }
         })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => overlay.destroy());
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => overlay.destroy());
 
         overlay.add([dimmer, modal, title, content, clearBtn, closeBtn]);
     }
