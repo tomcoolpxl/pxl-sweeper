@@ -53,12 +53,12 @@ export class UIScene extends Phaser.Scene {
             fontFamily: '"Arial Black", "Trebuchet MS", sans-serif'
         }).setOrigin(0.5);
 
-        this.statsText = this.add.text(width / 2, height / 2 - 24, '', {
+        this.statsText = this.add.text(width / 2, height / 2 - 18, '', {
             fontSize: '21px',
             color: UI.COLORS.MENU_TEXT_SOFT,
             fontFamily: '"Trebuchet MS", sans-serif',
             align: 'center',
-            lineSpacing: 8
+            lineSpacing: 2
         }).setOrigin(0.5);
 
         this.playAgainBtn = this.createModalButton(width / 2, height / 2 + 66, 190, 'PLAY AGAIN', UI.COLORS.ACCENT_GREEN, () => {
@@ -70,7 +70,7 @@ export class UIScene extends Phaser.Scene {
             });
         });
 
-        this.mainMenuBtn = this.createModalButton(width / 2, height / 2 + 124, 170, 'MAIN MENU', UI.COLORS.ACCENT_CYAN, () => {
+        this.mainMenuBtn = this.createModalButton(width / 2, height / 2 + 118, 170, 'MAIN MENU', UI.COLORS.ACCENT_CYAN, () => {
             this.scene.stop('GameScene');
             this.scene.start('MenuScene');
         });
@@ -136,9 +136,9 @@ export class UIScene extends Phaser.Scene {
 
         this.drawOverlayChrome(width, height);
         this.statusText.setPosition(width / 2, height / 2 - 94);
-        this.statsText.setPosition(width / 2, height / 2 - 24);
+        this.statsText.setPosition(width / 2, height / 2 - 18);
         this.playAgainBtn.setPosition(width / 2, height / 2 + 66);
-        this.mainMenuBtn.setPosition(width / 2, height / 2 + 124);
+        this.mainMenuBtn.setPosition(width / 2, height / 2 + 118);
         this.reviewBtn.setPosition(width / 2, height / 2 + 174);
     }
 
@@ -157,8 +157,8 @@ export class UIScene extends Phaser.Scene {
 
         // #19: unified timer format — padded 3 digits with 's' suffix
         const stats = [
-            `TIME: ${String(this.secondsElapsed).padStart(3, '0')}s`,
-            `BEST: ${best !== null ? String(best).padStart(3, '0') + 's' : '---'}`
+            `TIME        ${String(this.secondsElapsed).padStart(3, '0')}s`,
+            `BEST        ${best !== null ? String(best).padStart(3, '0') + 's' : '---'}`
         ].join('\n');
 
         this.statsText.setText(stats);

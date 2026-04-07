@@ -45,7 +45,7 @@ export class MenuScene extends Phaser.Scene {
         const rowGap = cardHeight + (isCompact ? 14 : isTablet ? 18 : MENU.CARD_GAP);
         const lastCardCenterY = cardsTopY + ((Math.ceil(3 / cardColumns) - 1) * rowGap);
         const cardsBottomY = lastCardCenterY + (cardHeight / 2);
-        const utilityTopY = cardsBottomY + 26;
+        const utilityTopY = cardsBottomY + 18;
         const utilityBlockHeight = (utilityRows * utilityHeight) + ((utilityRows - 1) * (isCompact ? 12 : MENU.UTILITY_GAP));
         const utilityCenterY = utilityTopY + (utilityHeight / 2);
         const footerY = utilityTopY + utilityBlockHeight + (isCompact ? 24 : 28);
@@ -237,7 +237,7 @@ export class MenuScene extends Phaser.Scene {
             wordWrap: { width: width - 28 }
         }).setOrigin(0.5);
 
-        const ctaRuleY = height / 2 - (layout.isCompact ? 36 : 38);
+        const ctaRuleY = height / 2 - (layout.isCompact ? 48 : 50);
         const ctaY = height / 2 - (layout.isCompact ? 14 : 16);
         const ctaRule = this.add.graphics();
         ctaRule.fillStyle(options.accent, 0.3);
