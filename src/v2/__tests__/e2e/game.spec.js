@@ -142,6 +142,37 @@ test.describe('V2 Minesweeper Game', () => {
         expect(result.visibleMineCount).toBe(result.mineCount);
     });
 
+    test('should return to the menu cleanly from view board and still open highscores', async ({ page }) => {
+        await page.waitForFunction(() => window.game.scene.getScene('MenuScene')?.beginnerBtn);
+        await page.evaluate(() => window.game.scene.getScene('MenuScene').beginnerBtn.emit('pointerdown'));
+        await page.waitForFunction(() => window.game.scene.isActive('GameScene') && window.game.scene.isActive('UIScene'), { timeout: 5000 });
+        await page.waitForFunction(() => window.game.scene.getScene('GameScene')?.tiles?.length > 0);
+
+        const result = await page.evaluate(() => {
+            const gameScene = window.game.scene.getScene('GameScene');
+            const uiScene = window.game.scene.getScene('UIScene');
+
+            gameScene.handleLeftClick(0);
+            const mineIndex = gameScene.engine.grid.findIndex((cell) => cell.isMine);
+            gameScene.handleLeftClick(mineIndex);
+            uiScene.reviewBtn.emit('pointerdown');
+            uiScene.returnToMenu();
+
+            const menuScene = window.game.scene.getScene('MenuScene');
+            menuScene.highscoresBtn.emit('pointerdown');
+
+            return {
+                menuActive: window.game.scene.isActive('MenuScene'),
+                uiActive: window.game.scene.isActive('UIScene'),
+                highscoreTitle: menuScene.children.list.find((child) => child.text === 'FASTEST TIMES')?.text || null
+            };
+        });
+
+        expect(result.menuActive).toBe(true);
+        expect(result.uiActive).toBe(false);
+        expect(result.highscoreTitle).toBe('FASTEST TIMES');
+    });
+
     test('should trigger WON state when all non-mine cells are revealed', async ({ page }) => {
         await page.waitForFunction(() => window.game.scene.getScene('MenuScene')?.beginnerBtn);
         await page.evaluate(() => window.game.scene.getScene('MenuScene').beginnerBtn.emit('pointerdown'));

@@ -34,8 +34,7 @@ export class UIScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.restartBtn = this.createHudButton(hudLayout.menu.centerX, hudLayout.menu.centerY, hudLayout.menu.width, 'MENU', UI.COLORS.ACCENT_CYAN, () => {
-            this.scene.stop('GameScene');
-            this.scene.start('MenuScene');
+            this.returnToMenu();
         });
 
         this.muteBtn = this.createHudButton(hudLayout.sound.centerX, hudLayout.sound.centerY, hudLayout.sound.width, soundManager.enabled ? 'SOUND ON' : 'SOUND OFF', UI.COLORS.ACCENT_GOLD, () => {
@@ -65,14 +64,14 @@ export class UIScene extends Phaser.Scene {
             this.cameras.main.fadeOut(250, 0, 0, 0, (camera, progress) => {
                 if (progress === 1) {
                     this.scene.stop('GameScene');
+                    this.scene.stop('UIScene');
                     this.scene.start('GameScene', { difficulty: this.engine.difficultyKey });
                 }
             });
         });
 
         this.mainMenuBtn = this.createModalButton(width / 2, height / 2 + 118, 170, 'MAIN MENU', UI.COLORS.ACCENT_CYAN, () => {
-            this.scene.stop('GameScene');
-            this.scene.start('MenuScene');
+            this.returnToMenu();
         });
 
         this.reviewBtn = this.createModalButton(width / 2, height / 2 + 174, 150, 'VIEW BOARD', UI.COLORS.ACCENT_GOLD, () => {
@@ -189,6 +188,14 @@ export class UIScene extends Phaser.Scene {
             this.timerEvent.remove();
             this.timerEvent = null;
         }
+    }
+
+    returnToMenu() {
+        this.stopTimer();
+        this.overlay.setVisible(false);
+        this.scene.stop('GameScene');
+        this.scene.start('MenuScene');
+        this.scene.stop('UIScene');
     }
 
     createHudChrome(width) {
