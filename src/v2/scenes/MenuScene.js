@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { themeManager } from '../utils/ThemeManager';
 import { highscoreManager } from '../utils/HighscoreManager';
 import { V2_CONFIG } from '../config';
 
@@ -11,52 +10,47 @@ export class MenuScene extends Phaser.Scene {
     create() {
         const { width, height } = this.cameras.main;
         const { UI } = V2_CONFIG;
-        const theme = themeManager.getTheme();
 
-        this.add.text(width / 2, height / UI.MENU.TITLE_Y_DIV, 'PXL SWEEPER V2', {
-            fontSize: '48px',
+        // Group all menu elements in a central container for perfect alignment
+        const menuContainer = this.add.container(width / 2, height * UI.MENU.CONTAINER_Y_PCT);
+
+        const title = this.add.text(0, -200, 'PXL SWEEPER V2', {
+            fontSize: '56px',
             fontFamily: 'monospace',
-            fill: UI.COLORS.WHITE
+            fill: UI.COLORS.WHITE,
+            fontWeight: 'bold'
         }).setOrigin(0.5);
 
-        const createButton = (y, label, callback, color = UI.COLORS.BTN_BLUE) => {
-            const btn = this.add.text(width / 2, y, label, {
-                fontSize: '24px',
-                fontFamily: 'monospace',
-                fill: color,
-                backgroundColor: UI.COLORS.BTN_BG,
-                padding: { x: 20, y: 10 }
-            })
+        const btnStyle = {
+            fontSize: '24px',
+            fontFamily: 'monospace',
+            backgroundColor: UI.COLORS.BTN_BG,
+            padding: { x: 30, y: 12 }
+        };
+
+        const createBtn = (y, label, callback, color) => {
+            const btn = this.add.text(0, y, label, { ...btnStyle, fill: color })
                 .setOrigin(0.5)
                 .setInteractive({ useHandCursor: true })
                 .on('pointerdown', callback);
-
+            
             btn.on('pointerover', () => btn.setStyle({ backgroundColor: UI.COLORS.BTN_HOVER }));
             btn.on('pointerout', () => btn.setStyle({ backgroundColor: UI.COLORS.BTN_BG }));
             
+            menuContainer.add(btn);
             return btn;
         };
 
-        const baseHeight = height * UI.MENU.BTN_START_Y_PCT;
-        const spacing = UI.MENU.BTN_SPACING;
-        
-        createButton(baseHeight, 'BEGINNER', () => this.scene.start('GameScene', { difficulty: 'BEGINNER' }));
-        createButton(baseHeight + spacing, 'INTERMEDIATE', () => this.scene.start('GameScene', { difficulty: 'INTERMEDIATE' }));
-        createButton(baseHeight + spacing * 2, 'EXPERT', () => this.scene.start('GameScene', { difficulty: 'EXPERT' }));
+        const spacing = 65;
+        const startY = -70;
 
-        // Trophy (Highscores) Button
-        createButton(baseHeight + spacing * 3.3, '🏆 HIGHSCORES', () => this.showHighscores(), UI.COLORS.BTN_ORANGE);
+        createBtn(startY, 'BEGINNER', () => this.scene.start('GameScene', { difficulty: 'BEGINNER' }), UI.COLORS.BTN_BLUE);
+        createBtn(startY + spacing, 'INTERMEDIATE', () => this.scene.start('GameScene', { difficulty: 'INTERMEDIATE' }), UI.COLORS.BTN_BLUE);
+        createBtn(startY + spacing * 2, 'EXPERT', () => this.scene.start('GameScene', { difficulty: 'EXPERT' }), UI.COLORS.BTN_BLUE);
+        createBtn(startY + spacing * 3.3, '🏆 HIGHSCORES', () => this.showHighscores(), UI.COLORS.BTN_ORANGE);
+        createBtn(startY + spacing * 4.3, '❓ HOW TO PLAY', () => this.showTutorial(), UI.COLORS.WIN);
 
-        // Tutorial Button
-        createButton(baseHeight + spacing * 4.3, 'TUTORIAL', () => this.showTutorial(), UI.COLORS.WIN);
-
-        // Theme Toggle Button
-        const themeBtn = createButton(height - UI.MENU.THEME_BTN_OFFSET_Y, `THEME: ${theme.name}`, () => {
-            const newTheme = theme.name === 'Classic' ? 'DARK' : 'CLASSIC';
-            themeManager.setTheme(newTheme);
-            this.scene.restart();
-        }, UI.COLORS.BTN_GREY);
-        themeBtn.setFontSize('16px');
+        menuContainer.add(title);
     }
 
     showTutorial() {
@@ -66,10 +60,11 @@ export class MenuScene extends Phaser.Scene {
         const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
         
         const modal = this.add.rectangle(width / 2, height / 2, UI.MODAL.TUTORIAL_WIDTH, UI.MODAL.TUTORIAL_HEIGHT, UI.MODAL.BG).setOrigin(0.5);
-        const title = this.add.text(width / 2, height / 2 - UI.MODAL.TITLE_OFFSET_Y, 'HOW TO PLAY', {
+        const title = this.add.text(width / 2, height / 2 - 140, 'HOW TO PLAY', {
             fontSize: '32px',
             fontFamily: 'monospace',
-            fill: UI.COLORS.WHITE
+            fill: UI.COLORS.WHITE,
+            fontWeight: 'bold'
         }).setOrigin(0.5);
 
         const steps = [
@@ -87,7 +82,7 @@ export class MenuScene extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5);
 
-        const closeBtn = this.add.text(width / 2, height / 2 + UI.MODAL.CLOSE_BTN_OFFSET_Y, 'GOT IT!', {
+        const closeBtn = this.add.text(width / 2, height / 2 + 130, 'GOT IT!', {
             fontSize: '20px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.BTN_ORANGE,
@@ -106,11 +101,12 @@ export class MenuScene extends Phaser.Scene {
         const overlay = this.add.container(0, 0);
         const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
         
-        const modal = this.add.rectangle(width / 2, height / 2, 400, 300, UI.MODAL.BG).setOrigin(0.5);
-        const title = this.add.text(width / 2, height / 2 - 110, 'FASTEST TIMES', {
+        const modal = this.add.rectangle(width / 2, height / 2, 400, 350, UI.MODAL.BG).setOrigin(0.5);
+        const title = this.add.text(width / 2, height / 2 - 120, 'FASTEST TIMES', {
             fontSize: '32px',
             fontFamily: 'monospace',
-            fill: UI.COLORS.WHITE
+            fill: UI.COLORS.WHITE,
+            fontWeight: 'bold'
         }).setOrigin(0.5);
 
         const scores = highscoreManager.getScores();
@@ -121,13 +117,13 @@ export class MenuScene extends Phaser.Scene {
         ].join('\n\n');
 
         const content = this.add.text(width / 2, height / 2 - 10, scoreText, {
-            fontSize: '20px',
+            fontSize: '22px',
             fontFamily: 'monospace',
             fill: UI.COLORS.WHITE,
             align: 'center'
         }).setOrigin(0.5);
 
-        const clearBtn = this.add.text(width / 2, height / 2 + 60, 'CLEAR ALL', {
+        const clearBtn = this.add.text(width / 2, height / 2 + 80, 'CLEAR ALL', {
             fontSize: '16px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.LOSS,
@@ -143,7 +139,7 @@ export class MenuScene extends Phaser.Scene {
                 }
             });
 
-        const closeBtn = this.add.text(width / 2, height / 2 + 110, 'CLOSE', {
+        const closeBtn = this.add.text(width / 2, height / 2 + 130, 'CLOSE', {
             fontSize: '20px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.BTN_BLUE,

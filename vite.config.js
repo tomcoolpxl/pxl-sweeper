@@ -5,10 +5,9 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'script', // Injects registration script into index.html automatically
+      injectRegister: 'script',
       devOptions: {
-        enabled: true,
-        type: 'module'
+        enabled: false // Disable SW in dev mode to prevent ERR_CONNECTION_REFUSED/HMR issues
       },
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {

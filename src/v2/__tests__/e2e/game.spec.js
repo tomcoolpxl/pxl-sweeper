@@ -17,20 +17,35 @@ test.describe('V2 Minesweeper Game', () => {
     });
 
     test('should transition to GameScene and UIScene when BEGINNER is selected', async ({ page }) => {
-        // Wait for the MenuScene to be ready and buttons to be created
+        // Wait for the MenuScene to be ready
         await page.waitForFunction(() => {
-            const menuScene = window.game.scene.getScene('MenuScene');
-            // Check if buttons (Phaser.GameObjects.Text) exist in children list
-            return menuScene.children && menuScene.children.list.length > 0;
+            return window.game.scene.getScene('MenuScene') !== null;
         });
 
-        // Click the BEGINNER button by simulating a click on its coordinates
+        // Click the BEGINNER button
         await page.evaluate(() => {
             const menuScene = window.game.scene.getScene('MenuScene');
-            // The "BEGINNER" button is the second text object (index 1) after the title
-            const btn = menuScene.children.list.find(c => c.text === 'BEGINNER');
+            
+            // Search recursively for the button text
+            const findBtn = (root) => {
+                if (root.text === 'BEGINNER') return root;
+                if (root.list) {
+                    for (const child of root.list) {
+                        const found = findBtn(child);
+                        if (found) return found;
+                    }
+                }
+                if (root.children && root.children.list) {
+                    for (const child of root.children.list) {
+                        const found = findBtn(child);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            const btn = findBtn(menuScene);
             if (btn) {
-                // Simulate pointerdown
                 btn.emit('pointerdown');
             }
         });
@@ -38,7 +53,7 @@ test.describe('V2 Minesweeper Game', () => {
         // Wait for GameScene and UIScene to be active
         await page.waitForFunction(() => {
             return window.game.scene.isActive('GameScene') && window.game.scene.isActive('UIScene');
-        });
+        }, { timeout: 10000 });
 
         const isGameSceneActive = await page.evaluate(() => {
             return window.game.scene.isActive('GameScene');

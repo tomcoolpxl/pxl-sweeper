@@ -1,10 +1,10 @@
 export const V2_CONFIG = {
     // Layout & Scaling
     LAYOUT: {
-        HUD_HEIGHT: 80, // Reduced from 100 to save space
+        HUD_HEIGHT: 80,
         BASE_PADDING: 2,
         MAX_TILE_SIZE: 32,
-        MARGIN_PERCENT: 0.90, // Reduced from 0.95 to ensure clear safety margins
+        MARGIN_PERCENT: 0.90,
         UI_PADDING: 20,
         BOARD_OFFSET_Y_DIV: 4
     },
@@ -29,18 +29,18 @@ export const V2_CONFIG = {
     // UI Visuals
     UI: {
         MODAL: {
-            WIDTH: 300,
-            HEIGHT: 200,
+            WIDTH: 400,
+            HEIGHT: 250,
             TUTORIAL_WIDTH: 500,
             TUTORIAL_HEIGHT: 350,
             BG: 0x34495e,
-            DIMMER_ALPHA: 0.7,
-            TITLE_OFFSET_Y: 140,
-            CLOSE_BTN_OFFSET_Y: 130,
+            DIMMER_ALPHA: 0.5, // Reduced to see board better
+            TITLE_OFFSET_Y: 100,
+            CLOSE_BTN_OFFSET_Y: 100,
             STATS_OFFSET_Y: 20,
-            STATUS_OFFSET_Y: 80,
-            PLAY_AGAIN_OFFSET_Y: 50,
-            MAIN_MENU_OFFSET_Y: 110
+            STATUS_OFFSET_Y: 70,
+            PLAY_AGAIN_OFFSET_Y: 40,
+            MAIN_MENU_OFFSET_Y: 90
         },
         COLORS: {
             WHITE: '#ffffff',
@@ -53,7 +53,23 @@ export const V2_CONFIG = {
             BTN_BG: '#ecf0f1',
             BTN_HOVER: '#bdc3c7',
             BLACK: 0x000000,
-            DIMMER: 0x000000
+            DIMMER: 0x000000,
+            BOARD_BG: 0x2c3e50,
+            TILE_HIDDEN: 0x95a5a6,
+            TILE_REVEALED: 0xbdc3c7,
+            TILE_MINE: 0xe74c3c,
+            FLAG: '#e74c3c',
+            NUMBERS: [
+                '#ffffff', // 0
+                '#2980b9', // 1
+                '#27ae60', // 2
+                '#c0392b', // 3
+                '#8e44ad', // 4
+                '#e67e22', // 5
+                '#16a085', // 6
+                '#2c3e50', // 7
+                '#7f8c8d'  // 8
+            ]
         },
         PARTICLES: {
             WIN_QUANTITY: 150,
@@ -67,11 +83,9 @@ export const V2_CONFIG = {
             LOSS_GRAVITY_Y: -100
         },
         MENU: {
-            TITLE_Y_DIV: 4,
-            BTN_START_Y_PCT: 0.45,
-            BTN_SPACING: 60,
-            THEME_BTN_OFFSET_Y: 50,
-            TUTORIAL_OFFSET_Y_SPACING: 4.3 // Adjusted to 4.3 to match actual code
+            TITLE_Y_OFFSET: -180,
+            BTN_SPACING: 65,
+            CONTAINER_Y_PCT: 0.5
         }
     },
     // Preload Constants

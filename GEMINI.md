@@ -3,6 +3,7 @@
 This repository builds the PXL Sweep game.
 
 `REQUIREMENTS.md` is the current project truth.
+AND v2 requirements are in `REQUIREMENTS_V2.md`
 
 ## Testing Mandates
 

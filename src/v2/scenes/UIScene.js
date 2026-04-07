@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { themeManager } from '../utils/ThemeManager';
 import { highscoreManager } from '../utils/HighscoreManager';
 import { V2_CONFIG } from '../config';
 
@@ -11,7 +10,6 @@ export class UIScene extends Phaser.Scene {
     init(data) {
         this.engine = data.engine;
         this.secondsElapsed = 0;
-        this.theme = themeManager.getTheme();
     }
 
     create() {
@@ -25,14 +23,16 @@ export class UIScene extends Phaser.Scene {
         this.mineText = this.add.text(LAYOUT.UI_PADDING, LAYOUT.UI_PADDING, `Mines: ${this.engine.getRemainingMines()}`, {
             fontSize: '24px',
             fill: UI.COLORS.WHITE,
-            fontFamily: 'monospace'
+            fontFamily: 'monospace',
+            fontWeight: 'bold'
         });
 
         // Timer (Top Right)
         this.timerText = this.add.text(width - LAYOUT.UI_PADDING, LAYOUT.UI_PADDING, 'Time: 000', {
             fontSize: '24px',
             fill: UI.COLORS.WHITE,
-            fontFamily: 'monospace'
+            fontFamily: 'monospace',
+            fontWeight: 'bold'
         }).setOrigin(1, 0);
 
         // Menu Button (Top Center)
@@ -40,7 +40,7 @@ export class UIScene extends Phaser.Scene {
             fontSize: '20px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.MENU_BG,
-            padding: { x: 10, y: 5 }
+            padding: { x: 15, y: 8 }
         })
             .setOrigin(0.5, 0)
             .setInteractive({ useHandCursor: true })
@@ -49,30 +49,35 @@ export class UIScene extends Phaser.Scene {
                 this.scene.start('MenuScene');
             });
 
-        // Game Over Overlay (Hidden initially)
+        // Game Over Overlay
         this.overlay = this.add.container(0, 0).setVisible(false);
-        const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
-        const modal = this.add.rectangle(width / 2, height / 2, 400, 300, UI.MODAL.BG).setOrigin(0.5);
         
-        this.statusText = this.add.text(width / 2, height / 2 - UI.MODAL.STATUS_OFFSET_Y, '', {
-            fontSize: '36px',
+        // Semi-transparent dimmer that covers the screen but allows board to be seen
+        const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA)
+            .setOrigin(0)
+            .setInteractive(); // Blocks clicks to board
+        
+        const modal = this.add.rectangle(width / 2, height / 2, 400, 350, UI.MODAL.BG).setOrigin(0.5);
+        
+        this.statusText = this.add.text(width / 2, height / 2 - 100, '', {
+            fontSize: '42px',
             fill: UI.COLORS.WHITE,
             fontFamily: 'monospace',
             fontWeight: 'bold'
         }).setOrigin(0.5);
         
-        this.statsText = this.add.text(width / 2, height / 2 - UI.MODAL.STATS_OFFSET_Y, '', {
-            fontSize: '20px',
+        this.statsText = this.add.text(width / 2, height / 2 - 30, '', {
+            fontSize: '22px',
             fill: UI.COLORS.WHITE,
             fontFamily: 'monospace',
             align: 'center'
         }).setOrigin(0.5);
 
-        const playAgainBtn = this.add.text(width / 2, height / 2 + UI.MODAL.PLAY_AGAIN_OFFSET_Y, 'PLAY AGAIN', {
+        const playAgainBtn = this.add.text(width / 2, height / 2 + 40, 'PLAY AGAIN', {
             fontSize: '24px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.WIN,
-            padding: { x: 20, y: 10 }
+            padding: { x: 25, y: 12 }
         })
             .setOrigin(0.5)
             .setInteractive({ useHandCursor: true })
@@ -85,11 +90,11 @@ export class UIScene extends Phaser.Scene {
                 });
             });
 
-        const mainMenuBtn = this.add.text(width / 2, height / 2 + UI.MODAL.MAIN_MENU_OFFSET_Y, 'MAIN MENU', {
-            fontSize: '18px',
+        const mainMenuBtn = this.add.text(width / 2, height / 2 + 100, 'MAIN MENU', {
+            fontSize: '20px',
             fill: UI.COLORS.WHITE,
             backgroundColor: UI.COLORS.BTN_BLUE,
-            padding: { x: 15, y: 8 }
+            padding: { x: 20, y: 10 }
         })
             .setOrigin(0.5)
             .setInteractive({ useHandCursor: true })
@@ -98,7 +103,21 @@ export class UIScene extends Phaser.Scene {
                 this.scene.start('MenuScene');
             });
 
-        this.overlay.add([dimmer, modal, this.statusText, this.statsText, playAgainBtn, mainMenuBtn]);
+        const reviewBtn = this.add.text(width / 2, height / 2 + 150, 'VIEW BOARD', {
+            fontSize: '16px',
+            fill: UI.COLORS.WHITE,
+            backgroundColor: UI.COLORS.BTN_GREY,
+            padding: { x: 15, y: 8 }
+        })
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.overlay.setVisible(false);
+                // Re-show menu button in HUD if it was hidden
+                this.restartBtn.setVisible(true);
+            });
+
+        this.overlay.add([dimmer, modal, this.statusText, this.statsText, playAgainBtn, mainMenuBtn, reviewBtn]);
 
         // Listen for events from GameScene
         const gameScene = this.scene.get('GameScene');
@@ -138,7 +157,7 @@ export class UIScene extends Phaser.Scene {
 
     handleResize(gameSize) {
         const { width, height } = gameSize;
-        const { LAYOUT, UI } = V2_CONFIG;
+        const { LAYOUT } = V2_CONFIG;
         this.cameras.main.setViewport(0, 0, width, height);
 
         this.mineText.setPosition(LAYOUT.UI_PADDING, LAYOUT.UI_PADDING);
@@ -150,13 +169,15 @@ export class UIScene extends Phaser.Scene {
         const modal = this.overlay.list[1];
         const playAgainBtn = this.overlay.list[4];
         const mainMenuBtn = this.overlay.list[5];
+        const reviewBtn = this.overlay.list[6];
 
         dimmer.setSize(width, height);
         modal.setPosition(width / 2, height / 2);
-        this.statusText.setPosition(width / 2, height / 2 - UI.MODAL.STATUS_OFFSET_Y);
-        this.statsText.setPosition(width / 2, height / 2 - UI.MODAL.STATS_OFFSET_Y);
-        playAgainBtn.setPosition(width / 2, height / 2 + UI.MODAL.PLAY_AGAIN_OFFSET_Y);
-        mainMenuBtn.setPosition(width / 2, height / 2 + UI.MODAL.MAIN_MENU_OFFSET_Y);
+        this.statusText.setPosition(width / 2, height / 2 - 100);
+        this.statsText.setPosition(width / 2, height / 2 - 30);
+        playAgainBtn.setPosition(width / 2, height / 2 + 40);
+        mainMenuBtn.setPosition(width / 2, height / 2 + 100);
+        reviewBtn.setPosition(width / 2, height / 2 + 150);
     }
 
     showGameOver(won, isNewRecord = false) {

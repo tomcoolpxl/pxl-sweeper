@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { MinesweeperEngine, GAME_STATES } from '../MinesweeperEngine';
 import { soundManager } from '../utils/SoundManager';
-import { themeManager } from '../utils/ThemeManager';
 import { V2_CONFIG } from '../config';
 
 export class GameScene extends Phaser.Scene {
@@ -14,10 +13,11 @@ export class GameScene extends Phaser.Scene {
         this.engine = new MinesweeperEngine(this.difficultyKey);
         this.tiles = [];
         this.longPressTimer = null;
-        this.theme = themeManager.getTheme();
     }
 
     create() {
+        // Fix for shifting grid: Calculate scaling BEFORE creating any board elements
+        // and ensure we use the camera's base width/height.
         this.calculateScaling();
         this.createBoard();
 
@@ -28,27 +28,28 @@ export class GameScene extends Phaser.Scene {
     calculateScaling() {
         const { width, height } = this.cameras.main;
         const { LAYOUT } = V2_CONFIG;
-        const availableWidth = width * LAYOUT.MARGIN_PERCENT;
-        const availableHeight = (height - LAYOUT.HUD_HEIGHT) * LAYOUT.MARGIN_PERCENT;
-
-        // Calculate required tile size to fit board in available space
-        const tileW = (availableWidth / this.engine.cols) - LAYOUT.BASE_PADDING;
-        const tileH = (availableHeight / this.engine.rows) - LAYOUT.BASE_PADDING;
         
-        // Use the smaller of the two to maintain square tiles
+        // Safety: Use floor to avoid sub-pixel positioning which causes shifts
+        const safeWidth = Math.floor(width * LAYOUT.MARGIN_PERCENT);
+        const safeHeight = Math.floor((height - LAYOUT.HUD_HEIGHT) * LAYOUT.MARGIN_PERCENT);
+
+        const tileW = (safeWidth / this.engine.cols) - LAYOUT.BASE_PADDING;
+        const tileH = (safeHeight / this.engine.rows) - LAYOUT.BASE_PADDING;
+        
         this.tileSize = Math.floor(Math.min(tileW, tileH, LAYOUT.MAX_TILE_SIZE));
         this.padding = LAYOUT.BASE_PADDING;
 
-        // Calculate board dimensions
         const boardWidth = this.engine.cols * (this.tileSize + this.padding);
         const boardHeight = this.engine.rows * (this.tileSize + this.padding);
 
-        // Center board
-        this.startX = (width - boardWidth) / 2 + (this.tileSize + this.padding) / 2;
-        this.startY = (height - boardHeight) / 2 + (this.tileSize + this.padding) / 2 + (LAYOUT.HUD_HEIGHT / LAYOUT.BOARD_OFFSET_Y_DIV);
+        // Explicitly floor these values to prevent canvas snapping
+        this.startX = Math.floor((width - boardWidth) / 2 + (this.tileSize + this.padding) / 2);
+        this.startY = Math.floor((height - boardHeight) / 2 + (this.tileSize + this.padding) / 2 + (LAYOUT.HUD_HEIGHT / LAYOUT.BOARD_OFFSET_Y_DIV));
     }
 
     createBoard() {
+        const { UI } = V2_CONFIG;
+        
         for (let i = 0; i < this.engine.grid.length; i++) {
             const row = Math.floor(i / this.engine.cols);
             const col = i % this.engine.cols;
@@ -59,13 +60,14 @@ export class GameScene extends Phaser.Scene {
             const tileContainer = this.add.container(x, y);
             
             // Background / Hidden State
-            const bg = this.add.rectangle(0, 0, this.tileSize, this.tileSize, this.theme.tileHidden)
+            const bg = this.add.rectangle(0, 0, this.tileSize, this.tileSize, UI.COLORS.TILE_HIDDEN)
                 .setInteractive({ useHandCursor: true });
             
             const text = this.add.text(0, 0, '', {
                 fontSize: `${Math.floor(this.tileSize * 0.6)}px`,
                 fontFamily: 'monospace',
-                color: V2_CONFIG.UI.COLORS.WHITE
+                color: UI.COLORS.WHITE,
+                fontWeight: 'bold'
             }).setOrigin(0.5);
 
             tileContainer.add([bg, text]);
@@ -78,7 +80,6 @@ export class GameScene extends Phaser.Scene {
                 if (pointer.rightButtonDown()) {
                     this.handleRightClick(i);
                 } else {
-                    // Start long-press detection
                     this.longPressTimer = this.time.delayedCall(V2_CONFIG.TIMERS.LONG_PRESS_MS, () => {
                         this.handleRightClick(i);
                         this.longPressTimer = null;
@@ -92,14 +93,12 @@ export class GameScene extends Phaser.Scene {
 
                 if (!pointer.rightButtonDown()) {
                     if (this.longPressTimer) {
-                        // Short tap detected
                         this.longPressTimer.remove();
                         this.longPressTimer = null;
                         if (!tileContainer.getData('longPressed')) {
                             this.handleLeftClick(i);
                         }
                     }
-                    // Reset flag for next interaction
                     tileContainer.setData('longPressed', false);
                 }
             });
@@ -111,7 +110,6 @@ export class GameScene extends Phaser.Scene {
                 }
             });
 
-            // Prevent context menu
             this.input.mouse.disableContextMenu();
         }
     }
@@ -146,13 +144,14 @@ export class GameScene extends Phaser.Scene {
     }
 
     updateBoardUI(revealedIndices = []) {
+        const { UI } = V2_CONFIG;
+        
         for (let i = 0; i < this.engine.grid.length; i++) {
             const cell = this.engine.grid[i];
             const tile = this.tiles[i];
 
             if (cell.isRevealed) {
-                // Animate newly revealed tiles
-                if (revealedIndices.includes(i) && tile.bg.fillColor !== this.theme.tileRevealed) {
+                if (revealedIndices.includes(i) && tile.bg.fillColor !== UI.COLORS.TILE_REVEALED) {
                     this.tweens.add({
                         targets: tile.container,
                         scale: { from: 0.8, to: 1.0 },
@@ -161,28 +160,26 @@ export class GameScene extends Phaser.Scene {
                     });
                 }
 
-                tile.bg.setFillStyle(this.theme.tileRevealed);
+                tile.bg.setFillStyle(UI.COLORS.TILE_REVEALED);
                 if (cell.isMine) {
                     tile.text.setText('💣');
-                    tile.bg.setFillStyle(this.theme.tileMine);
+                    tile.bg.setFillStyle(UI.COLORS.TILE_MINE);
                 } else if (cell.neighborMines > 0) {
                     tile.text.setText(cell.neighborMines);
-                    tile.text.setColor(this.theme.numberColors[cell.neighborMines]);
+                    tile.text.setColor(UI.COLORS.NUMBERS[cell.neighborMines]);
                 } else {
                     tile.text.setText('');
                 }
             } else if (cell.isFlagged) {
                 tile.text.setText('🚩');
-                tile.text.setColor(this.theme.flagColor);
+                tile.text.setColor(UI.COLORS.FLAG);
             } else if (cell.isQuestionMarked) {
                 tile.text.setText('?');
-                tile.text.setColor(V2_CONFIG.UI.COLORS.WHITE);
+                tile.text.setColor(UI.COLORS.WHITE);
             } else {
                 tile.text.setText('');
             }
         }
-        
-        // Notify UI scene about mine count change
         this.events.emit('update-mines', this.engine.getRemainingMines());
     }
 

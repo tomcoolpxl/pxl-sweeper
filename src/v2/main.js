@@ -4,8 +4,7 @@ import { PreloadScene } from './scenes/PreloadScene';
 import { MenuScene } from './scenes/MenuScene';
 import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
-
-import { themeManager } from './utils/ThemeManager';
+import { V2_CONFIG } from './config';
 
 // PWA registration is now handled automatically by vite-plugin-pwa (injectRegister: 'script')
 
@@ -14,7 +13,7 @@ const config = {
     width: 800,
     height: 600,
     parent: 'game-container',
-    backgroundColor: themeManager.getTheme().bg,
+    backgroundColor: V2_CONFIG.UI.COLORS.BOARD_BG,
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
