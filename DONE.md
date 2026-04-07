@@ -138,9 +138,18 @@
 - [x] Verified PWA offline functionality and verified E2E test passes.
 
 ## Phase 20: Security, Infrastructure & UX Polish (Completed April 7, 2026)
-- [x] Performed `npm audit fix` and identified legacy peer dependency conflicts for PWA plugin.
+- [x] Resolved high-severity vulnerabilities in `serialize-javascript` by implementing `overrides` in `package.json` to force version `^7.0.5`.
 - [x] Integrated Playwright E2E tests into `package.json` with `test:e2e` script.
 - [x] Conducted a deep scan and refactored all remaining magic numbers into `V2_CONFIG`.
 - [x] Performed a comprehensive UX review and implemented flow improvements, including a "MAIN MENU" button on the Game Over overlay.
 - [x] Refined mobile haptics for more consistent touch feedback.
 - [x] Verified build and test integrity across both logic and E2E suites.
+
+## Phase 21: Highscores, PWA Fix & UX Polish (Completed April 7, 2026)
+- [x] Resolved the `virtual:pwa-register` import error by upgrading `vite-plugin-pwa` to `v0.21.1` and enabling `devOptions`.
+- [x] Implemented a persistent Highscore system in V2, sharing the `pxl_sweeper_scores` key with V1 for compatibility.
+- [x] Added a "🏆 HIGHSCORES" button and dedicated overlay to the Main Menu.
+- [x] Improved the "Play Again" flow with a camera fade-out transition to reduce jarring scene restarts.
+- [x] Integrated real-time "NEW RECORD! 🏆" feedback into the Game Over overlay.
+- [x] Addressed all remaining "magic numbers" in audio and UI positioning via `V2_CONFIG`.
+- [x] Verified build success and all test suites (Vitest + Playwright).

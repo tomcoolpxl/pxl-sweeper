@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { themeManager } from '../utils/ThemeManager';
+import { highscoreManager } from '../utils/HighscoreManager';
 import { V2_CONFIG } from '../config';
 
 export class UIScene extends Phaser.Scene {
@@ -50,7 +51,7 @@ export class UIScene extends Phaser.Scene {
 
         // Game Over Overlay (Hidden initially)
         this.overlay = this.add.container(0, 0).setVisible(false);
-        const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.DIMMER, UI.MODAL.DIMMER_ALPHA).setOrigin(0);
+        const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
         const modal = this.add.rectangle(width / 2, height / 2, UI.MODAL.WIDTH, UI.MODAL.HEIGHT, UI.MODAL.BG).setOrigin(0.5);
         
         this.statusText = this.add.text(width / 2, height / 2 - UI.MODAL.STATUS_OFFSET_Y, '', {
@@ -75,8 +76,12 @@ export class UIScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.scene.stop('GameScene');
-            this.scene.start('GameScene', { difficulty: this.engine.difficultyKey });
+            this.cameras.main.fadeOut(250, 0, 0, 0, (camera, progress) => {
+                if (progress === 1) {
+                    this.scene.stop('GameScene');
+                    this.scene.start('GameScene', { difficulty: this.engine.difficultyKey });
+                }
+            });
         });
 
         const mainMenuBtn = this.add.text(width / 2, height / 2 + UI.MODAL.MAIN_MENU_OFFSET_Y, 'MAIN MENU', {
@@ -103,8 +108,9 @@ export class UIScene extends Phaser.Scene {
         });
 
         gameScene.events.on('game-won', () => {
-            this.showGameOver(true);
-            this.updateA11y('You win! Game over.');
+            const isNewRecord = highscoreManager.checkScore(this.engine.difficultyKey, this.secondsElapsed);
+            this.showGameOver(true, isNewRecord);
+            this.updateA11y(isNewRecord ? `New record! ${this.secondsElapsed} seconds.` : 'You win! Game over.');
         });
 
         gameScene.events.on('game-lost', () => {
@@ -152,12 +158,17 @@ export class UIScene extends Phaser.Scene {
         mainMenuBtn.setPosition(width / 2, height / 2 + UI.MODAL.MAIN_MENU_OFFSET_Y);
     }
 
-    showGameOver(won) {
+    showGameOver(won, isNewRecord = false) {
         const { UI, TIMERS } = V2_CONFIG;
         this.stopTimer();
-        this.statusText.setText(won ? 'YOU WIN! 😎' : 'GAME OVER 😵');
+        
+        let status = won ? 'YOU WIN! 😎' : 'GAME OVER 😵';
+        if (isNewRecord) status = 'NEW RECORD! 🏆';
+        
+        this.statusText.setText(status);
         this.statusText.setColor(won ? UI.COLORS.WIN : UI.COLORS.LOSS);
         this.statsText.setText(`Time: ${this.secondsElapsed}s\nMines: ${this.engine.mineCount}`);
+        
         this.overlay.setVisible(true);
         this.overlay.setAlpha(0);
         this.tweens.add({

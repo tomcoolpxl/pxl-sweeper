@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { themeManager } from '../utils/ThemeManager';
+import { highscoreManager } from '../utils/HighscoreManager';
 import { V2_CONFIG } from '../config';
 
 export class MenuScene extends Phaser.Scene {
@@ -43,8 +44,11 @@ export class MenuScene extends Phaser.Scene {
         createButton(baseHeight + spacing, 'INTERMEDIATE', () => this.scene.start('GameScene', { difficulty: 'INTERMEDIATE' }));
         createButton(baseHeight + spacing * 2, 'EXPERT', () => this.scene.start('GameScene', { difficulty: 'EXPERT' }));
 
+        // Trophy (Highscores) Button
+        createButton(baseHeight + spacing * 3.3, '🏆 HIGHSCORES', () => this.showHighscores(), UI.COLORS.BTN_ORANGE);
+
         // Tutorial Button
-        createButton(baseHeight + spacing * 3.3, 'TUTORIAL', () => this.showTutorial(), UI.COLORS.WIN);
+        createButton(baseHeight + spacing * 4.3, 'TUTORIAL', () => this.showTutorial(), UI.COLORS.WIN);
 
         // Theme Toggle Button
         const themeBtn = createButton(height - UI.MENU.THEME_BTN_OFFSET_Y, `THEME: ${theme.name}`, () => {
@@ -59,7 +63,7 @@ export class MenuScene extends Phaser.Scene {
         const { width, height } = this.scale;
         const { UI } = V2_CONFIG;
         const overlay = this.add.container(0, 0);
-        const dimmer = this.add.rectangle(0, 0, width, height, 0x000000, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
+        const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
         
         const modal = this.add.rectangle(width / 2, height / 2, UI.MODAL.TUTORIAL_WIDTH, UI.MODAL.TUTORIAL_HEIGHT, UI.MODAL.BG).setOrigin(0.5);
         const title = this.add.text(width / 2, height / 2 - UI.MODAL.TITLE_OFFSET_Y, 'HOW TO PLAY', {
@@ -94,5 +98,61 @@ export class MenuScene extends Phaser.Scene {
         .on('pointerdown', () => overlay.destroy());
 
         overlay.add([dimmer, modal, title, content, closeBtn]);
+    }
+
+    showHighscores() {
+        const { width, height } = this.scale;
+        const { UI } = V2_CONFIG;
+        const overlay = this.add.container(0, 0);
+        const dimmer = this.add.rectangle(0, 0, width, height, UI.COLORS.BLACK, UI.MODAL.DIMMER_ALPHA).setOrigin(0).setInteractive();
+        
+        const modal = this.add.rectangle(width / 2, height / 2, 400, 300, UI.MODAL.BG).setOrigin(0.5);
+        const title = this.add.text(width / 2, height / 2 - 110, 'FASTEST TIMES', {
+            fontSize: '32px',
+            fontFamily: 'monospace',
+            fill: UI.COLORS.WHITE
+        }).setOrigin(0.5);
+
+        const scores = highscoreManager.getScores();
+        const scoreText = [
+            `BEGINNER: ${scores.BEGINNER ? scores.BEGINNER + 's' : '---'}`,
+            `INTERMEDIATE: ${scores.INTERMEDIATE ? scores.INTERMEDIATE + 's' : '---'}`,
+            `EXPERT: ${scores.EXPERT ? scores.EXPERT + 's' : '---'}`
+        ].join('\n\n');
+
+        const content = this.add.text(width / 2, height / 2 - 10, scoreText, {
+            fontSize: '20px',
+            fontFamily: 'monospace',
+            fill: UI.COLORS.WHITE,
+            align: 'center'
+        }).setOrigin(0.5);
+
+        const clearBtn = this.add.text(width / 2, height / 2 + 60, 'CLEAR ALL', {
+            fontSize: '16px',
+            fill: UI.COLORS.WHITE,
+            backgroundColor: UI.COLORS.LOSS,
+            padding: { x: 10, y: 5 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            if (confirm('Clear all scores?')) {
+                highscoreManager.clearScores();
+                overlay.destroy();
+                this.showHighscores();
+            }
+        });
+
+        const closeBtn = this.add.text(width / 2, height / 2 + 110, 'CLOSE', {
+            fontSize: '20px',
+            fill: UI.COLORS.WHITE,
+            backgroundColor: UI.COLORS.BTN_BLUE,
+            padding: { x: 20, y: 10 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => overlay.destroy());
+
+        overlay.add([dimmer, modal, title, content, clearBtn, closeBtn]);
     }
 }
