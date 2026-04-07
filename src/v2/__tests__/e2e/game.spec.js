@@ -83,6 +83,36 @@ test.describe('V2 Minesweeper Game', () => {
         expect(result).toBe('LOST');
     });
 
+    test('view board should show all bombs after a loss, including unrevealed mines', async ({ page }) => {
+        await page.waitForFunction(() => window.game.scene.getScene('MenuScene')?.beginnerBtn);
+        await page.evaluate(() => window.game.scene.getScene('MenuScene').beginnerBtn.emit('pointerdown'));
+        await page.waitForFunction(() => window.game.scene.isActive('GameScene'), { timeout: 5000 });
+        await page.waitForFunction(() => window.game.scene.getScene('GameScene')?.tiles?.length > 0);
+
+        const result = await page.evaluate(() => {
+            const gameScene = window.game.scene.getScene('GameScene');
+            const uiScene = window.game.scene.getScene('UIScene');
+
+            gameScene.handleLeftClick(0);
+            const mineIndices = gameScene.engine.grid
+                .map((cell, index) => ({ cell, index }))
+                .filter(({ cell }) => cell.isMine)
+                .map(({ index }) => index);
+
+            gameScene.handleLeftClick(mineIndices[0]);
+            uiScene.reviewBtn.emit('pointerdown');
+
+            const visibleMineCount = mineIndices.filter((index) => gameScene.tiles[index].text.text === '💣').length;
+
+            return {
+                mineCount: mineIndices.length,
+                visibleMineCount
+            };
+        });
+
+        expect(result.visibleMineCount).toBe(result.mineCount);
+    });
+
     test('should trigger WON state when all non-mine cells are revealed', async ({ page }) => {
         await page.waitForFunction(() => window.game.scene.getScene('MenuScene')?.beginnerBtn);
         await page.evaluate(() => window.game.scene.getScene('MenuScene').beginnerBtn.emit('pointerdown'));

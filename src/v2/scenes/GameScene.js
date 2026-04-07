@@ -208,6 +208,7 @@ export class GameScene extends Phaser.Scene {
 
         // #5: O(1) lookup instead of O(n) Array.includes inside the loop
         const revealedSet = new Set(revealedIndices);
+        const showAllMines = this.engine.state === GAME_STATES.LOST;
 
         for (let i = 0; i < this.engine.grid.length; i++) {
             const cell = this.engine.grid[i];
@@ -233,6 +234,10 @@ export class GameScene extends Phaser.Scene {
                 } else {
                     tile.text.setText('');
                 }
+            } else if (showAllMines && cell.isMine) {
+                tile.text.setText('💣');
+                tile.text.setColor(UI.COLORS.WHITE);
+                tile.bg.setFillStyle(UI.COLORS.TILE_MINE);
             } else if (cell.isFlagged) {
                 tile.text.setText('🚩');
                 tile.text.setColor(UI.COLORS.FLAG);
