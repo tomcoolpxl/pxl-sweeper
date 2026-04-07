@@ -39,6 +39,17 @@ export class MenuScene extends Phaser.Scene {
         const cardHeight = isCompact ? 118 : isTablet ? 132 : MENU.CARD_HEIGHT;
         const utilityWidth = isCompact ? Math.min(panelWidth - 44, 320) : Math.min(MENU.UTILITY_WIDTH, (panelWidth - 96) / 2);
 
+        const cardsTopY = isCompact ? -18 : isTablet ? -12 : 12;
+        const utilityHeight = V2_CONFIG.UI.MENU.UTILITY_HEIGHT;
+        const utilityRows = isCompact ? 2 : 1;
+        const rowGap = cardHeight + (isCompact ? 14 : isTablet ? 18 : MENU.CARD_GAP);
+        const lastCardCenterY = cardsTopY + ((Math.ceil(3 / cardColumns) - 1) * rowGap);
+        const cardsBottomY = lastCardCenterY + (cardHeight / 2);
+        const utilityTopY = cardsBottomY + 26;
+        const utilityBlockHeight = (utilityRows * utilityHeight) + ((utilityRows - 1) * (isCompact ? 12 : MENU.UTILITY_GAP));
+        const utilityCenterY = utilityTopY + (utilityHeight / 2);
+        const footerY = utilityTopY + utilityBlockHeight + (isCompact ? 24 : 28);
+
         return {
             width,
             height,
@@ -51,7 +62,11 @@ export class MenuScene extends Phaser.Scene {
             cardHeight,
             utilityWidth,
             cardGap: isCompact ? 14 : isTablet ? 18 : MENU.CARD_GAP,
-            utilityGap: isCompact ? 12 : MENU.UTILITY_GAP
+            utilityGap: isCompact ? 12 : MENU.UTILITY_GAP,
+            cardsTopY,
+            utilityTopY,
+            utilityCenterY,
+            footerY
         };
     }
 
@@ -165,7 +180,7 @@ export class MenuScene extends Phaser.Scene {
         ];
 
         cards.forEach((card, index) => {
-            const topY = layout.isCompact ? -10 : layout.isTablet ? -2 : 12;
+            const topY = layout.cardsTopY;
             const rowHeight = layout.cardHeight + layout.cardGap;
             const row = Math.floor(index / layout.cardColumns);
             const col = index % layout.cardColumns;
@@ -222,10 +237,11 @@ export class MenuScene extends Phaser.Scene {
             wordWrap: { width: width - 28 }
         }).setOrigin(0.5);
 
-        const ctaY = height / 2 - (layout.isCompact ? 18 : 20);
+        const ctaRuleY = height / 2 - (layout.isCompact ? 36 : 38);
+        const ctaY = height / 2 - (layout.isCompact ? 14 : 16);
         const ctaRule = this.add.graphics();
         ctaRule.fillStyle(options.accent, 0.3);
-        ctaRule.fillRoundedRect((-width / 2) + 16, ctaY - 15, width - 32, 1.5, 1);
+        ctaRule.fillRoundedRect((-width / 2) + 16, ctaRuleY, width - 32, 1.5, 1);
 
         const cta = this.add.text(0, ctaY, 'START SWEEP', {
             fontSize: layout.isCompact ? '11px' : '12px',
@@ -287,26 +303,27 @@ export class MenuScene extends Phaser.Scene {
                 label: '🏆 HIGHSCORES',
                 caption: 'Track your fastest clears',
                 accent: V2_CONFIG.UI.COLORS.ACCENT_GOLD,
-                callback: () => this.showHighscores()
+                callback: () => this.showHighscores(),
+                name: 'highscoresBtn'
             },
             {
                 label: '❓ HOW TO PLAY',
                 caption: 'Controls, rules, and rhythm',
                 accent: V2_CONFIG.UI.COLORS.ACCENT_GREEN,
-                callback: () => this.showTutorial()
+                callback: () => this.showTutorial(),
+                name: 'howToBtn'
             }
         ];
 
-        const rows = Math.ceil(3 / layout.cardColumns);
-        const cardsBaseY = layout.isCompact ? -10 : layout.isTablet ? -2 : 12;
-        const baseY = cardsBaseY + (rows * (layout.cardHeight + layout.cardGap)) + (layout.isCompact ? 6 : 14);
-
         if (layout.isCompact) {
+            const firstCenterY = layout.utilityCenterY;
             utilityButtons.forEach((button, index) => {
-                menuContainer.add(this.createUtilityButton(0, baseY + index * (V2_CONFIG.UI.MENU.UTILITY_HEIGHT + layout.utilityGap), layout.utilityWidth, button));
+                menuContainer.add(this.createUtilityButton(0, firstCenterY + index * (V2_CONFIG.UI.MENU.UTILITY_HEIGHT + layout.utilityGap), layout.utilityWidth, button));
             });
             return;
         }
+
+        const baseY = layout.utilityCenterY;
 
         const totalWidth = (layout.utilityWidth * utilityButtons.length) + layout.utilityGap;
         const startX = -totalWidth / 2 + layout.utilityWidth / 2;
@@ -368,18 +385,15 @@ export class MenuScene extends Phaser.Scene {
         });
 
         button.add([shell, accent, label, caption, hitZone]);
+        if (options.name) {
+            this[options.name] = hitZone;
+        }
         return button;
     }
 
     createFooterCopy(menuContainer, layout) {
         const { UI } = V2_CONFIG;
-        const rows = Math.ceil(3 / layout.cardColumns);
-        const cardsBaseY = layout.isCompact ? -10 : layout.isTablet ? -2 : 12;
-        const utilityBaseY = cardsBaseY + (rows * (layout.cardHeight + layout.cardGap)) + (layout.isCompact ? 6 : 14);
-        const utilityBlockHeight = layout.isCompact
-            ? (2 * V2_CONFIG.UI.MENU.UTILITY_HEIGHT) + layout.utilityGap
-            : V2_CONFIG.UI.MENU.UTILITY_HEIGHT;
-        const footerY = utilityBaseY + utilityBlockHeight / 2 + (layout.isCompact ? 34 : 44);
+        const footerY = layout.footerY;
 
         const footer = this.add.text(0, footerY, 'FIRST CLICK IS ALWAYS SAFE // TAP, CLICK, OR KEYBOARD READY', {
             fontSize: layout.isCompact ? '11px' : '12px',
@@ -420,24 +434,45 @@ export class MenuScene extends Phaser.Scene {
     showHighscores() {
         const { width, height } = this.scale;
         const { UI } = V2_CONFIG;
-        const overlay = this.createModalShell(width, height, Math.min(460, width - 30), Math.min(390, height - 40), 'FASTEST TIMES');
+        const overlay = this.createModalShell(width, height, Math.min(460, width - 30), Math.min(420, height - 40), 'FASTEST TIMES');
 
         const scores = highscoreManager.getScores();
         const fmt = (v) => v !== null ? String(v).padStart(3, '0') + 's' : '---';
-        const scoreText = [
-            `BEGINNER:     ${fmt(scores.BEGINNER)}`,
-            `INTERMEDIATE: ${fmt(scores.INTERMEDIATE)}`,
-            `EXPERT:       ${fmt(scores.EXPERT)}`
-        ].join('\n\n');
+        const rows = [
+            { label: 'BEGINNER', value: fmt(scores.BEGINNER), accent: UI.COLORS.ACCENT_CYAN },
+            { label: 'INTERMEDIATE', value: fmt(scores.INTERMEDIATE), accent: UI.COLORS.ACCENT_GOLD },
+            { label: 'EXPERT', value: fmt(scores.EXPERT), accent: UI.COLORS.ACCENT_RED }
+        ];
 
-        const content = this.add.text(width / 2, height / 2 - 10, scoreText, {
-            fontSize: '22px',
-            fontFamily: '"Trebuchet MS", sans-serif',
-            color: UI.COLORS.MENU_TEXT_SOFT,
-            align: 'center'
-        }).setOrigin(0.5);
+        const tableX = width / 2;
+        const tableY = height / 2 - 52;
+        const labelX = tableX - 108;
+        const valueX = tableX + 118;
+        const rowGap = 46;
+        const content = this.add.container(0, 0);
 
-        const clearBtn = this.createModalButton(width / 2, height / 2 + 94, 170, 'CLEAR ALL', UI.COLORS.ACCENT_RED, () => {
+        rows.forEach((row, index) => {
+            const y = tableY + (index * rowGap);
+            const rule = this.add.graphics();
+            rule.fillStyle(row.accent, 0.7);
+            rule.fillRoundedRect(tableX - 158, y - 16, 8, 30, 4);
+
+            const label = this.add.text(labelX, y, row.label, {
+                fontSize: '22px',
+                fontFamily: '"Arial Black", "Trebuchet MS", sans-serif',
+                color: UI.COLORS.MENU_TEXT_SOFT
+            }).setOrigin(0, 0.5);
+
+            const value = this.add.text(valueX, y, row.value, {
+                fontSize: '22px',
+                fontFamily: '"Arial Black", "Trebuchet MS", sans-serif',
+                color: UI.COLORS.WHITE
+            }).setOrigin(1, 0.5);
+
+            content.add([rule, label, value]);
+        });
+
+        const clearBtn = this.createModalButton(width / 2, height / 2 + 120, 170, 'CLEAR ALL', UI.COLORS.ACCENT_RED, () => {
             this.showConfirm('Clear all scores?', () => {
                 highscoreManager.clearScores();
                 overlay.destroy();
@@ -445,7 +480,7 @@ export class MenuScene extends Phaser.Scene {
             });
         });
 
-        const closeBtn = this.createModalButton(width / 2, height / 2 + 148, 150, 'CLOSE', UI.COLORS.ACCENT_CYAN, () => overlay.destroy());
+        const closeBtn = this.createModalButton(width / 2, height / 2 + 174, 150, 'CLOSE', UI.COLORS.ACCENT_CYAN, () => overlay.destroy());
 
         overlay.add([content, clearBtn, closeBtn]);
     }
@@ -455,19 +490,19 @@ export class MenuScene extends Phaser.Scene {
         const { width, height } = this.scale;
         const { UI } = V2_CONFIG;
         const overlay = this.createModalShell(width, height, 400, 220, 'CONFIRM ACTION');
-        const text = this.add.text(width / 2, height / 2 - 40, message, {
+        const text = this.add.text(width / 2, height / 2 - 4, message, {
             fontSize: '20px',
             fontFamily: '"Trebuchet MS", sans-serif',
             color: UI.COLORS.MENU_TEXT_SOFT,
             align: 'center'
         }).setOrigin(0.5);
 
-        const yesBtn = this.createModalButton(width / 2 - 78, height / 2 + 38, 120, 'YES', UI.COLORS.ACCENT_RED, () => {
+        const yesBtn = this.createModalButton(width / 2 - 78, height / 2 + 58, 120, 'YES', UI.COLORS.ACCENT_RED, () => {
             overlay.destroy();
             onConfirm();
         });
 
-        const noBtn = this.createModalButton(width / 2 + 78, height / 2 + 38, 120, 'NO', UI.COLORS.ACCENT_CYAN, () => overlay.destroy());
+        const noBtn = this.createModalButton(width / 2 + 78, height / 2 + 58, 120, 'NO', UI.COLORS.ACCENT_CYAN, () => overlay.destroy());
 
         overlay.add([text, yesBtn, noBtn]);
     }

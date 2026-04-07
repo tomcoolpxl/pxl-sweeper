@@ -49,6 +49,18 @@ test.describe('V2 Minesweeper Game', () => {
         expect(hud.timer).toBe('TIME 000');
     });
 
+    test('should open highscores from the menu', async ({ page }) => {
+        await page.waitForFunction(() => window.game.scene.getScene('MenuScene')?.highscoresBtn);
+
+        const title = await page.evaluate(() => {
+            const menu = window.game.scene.getScene('MenuScene');
+            menu.highscoresBtn.emit('pointerdown');
+            return menu.children.list.find((child) => child.text === 'FASTEST TIMES')?.text || null;
+        });
+
+        expect(title).toBe('FASTEST TIMES');
+    });
+
     // #10: gameplay e2e tests
 
     test('should reveal a safe cell on first click', async ({ page }) => {
