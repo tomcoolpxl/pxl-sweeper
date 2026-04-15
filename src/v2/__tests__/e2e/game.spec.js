@@ -52,10 +52,30 @@ test.describe('V2 Minesweeper Game', () => {
     test('should open highscores from the menu', async ({ page }) => {
         await page.waitForFunction(() => window.game.scene.getScene('MenuScene')?.highscoresBtn);
 
-        const title = await page.evaluate(() => {
+        await page.evaluate(() => {
             const menu = window.game.scene.getScene('MenuScene');
             menu.highscoresBtn.emit('pointerdown');
-            return menu.children.list.find((child) => child.text === 'FASTEST TIMES')?.text || null;
+        });
+
+        const title = await page.evaluate(() => {
+            const menu = window.game.scene.getScene('MenuScene');
+
+            const findTextInScene = (scene, text) => {
+                const visit = (node) => {
+                    if (node.text === text) return node;
+                    if (node.list && Array.isArray(node.list)) {
+                        for (const child of node.list) {
+                            const result = visit(child);
+                            if (result) return result;
+                        }
+                    }
+                    return null;
+                };
+
+                return visit({ list: scene.children.list })?.text || null;
+            };
+
+            return findTextInScene(menu, 'FASTEST TIMES');
         });
 
         expect(title).toBe('FASTEST TIMES');
@@ -148,7 +168,7 @@ test.describe('V2 Minesweeper Game', () => {
         await page.waitForFunction(() => window.game.scene.isActive('GameScene') && window.game.scene.isActive('UIScene'), { timeout: 5000 });
         await page.waitForFunction(() => window.game.scene.getScene('GameScene')?.tiles?.length > 0);
 
-        const result = await page.evaluate(() => {
+        await page.evaluate(() => {
             const gameScene = window.game.scene.getScene('GameScene');
             const uiScene = window.game.scene.getScene('UIScene');
 
@@ -157,14 +177,36 @@ test.describe('V2 Minesweeper Game', () => {
             gameScene.handleLeftClick(mineIndex);
             uiScene.reviewBtn.emit('pointerdown');
             uiScene.returnToMenu();
+        });
 
+        await page.waitForFunction(() =>
+            window.game.scene.isActive('MenuScene') && !window.game.scene.isActive('UIScene'),
+            { timeout: 5000 }
+        );
+
+        const result = await page.evaluate(() => {
             const menuScene = window.game.scene.getScene('MenuScene');
             menuScene.highscoresBtn.emit('pointerdown');
+
+            const findTextInScene = (scene, text) => {
+                const visit = (node) => {
+                    if (node.text === text) return node;
+                    if (node.list && Array.isArray(node.list)) {
+                        for (const child of node.list) {
+                            const result = visit(child);
+                            if (result) return result;
+                        }
+                    }
+                    return null;
+                };
+
+                return visit({ list: scene.children.list })?.text || null;
+            };
 
             return {
                 menuActive: window.game.scene.isActive('MenuScene'),
                 uiActive: window.game.scene.isActive('UIScene'),
-                highscoreTitle: menuScene.children.list.find((child) => child.text === 'FASTEST TIMES')?.text || null
+                highscoreTitle: findTextInScene(menuScene, 'FASTEST TIMES')
             };
         });
 
