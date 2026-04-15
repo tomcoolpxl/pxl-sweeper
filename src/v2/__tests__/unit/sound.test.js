@@ -131,7 +131,7 @@ describe('SoundManager', () => {
         expect(audioInstances[0].src).toBe('/assets/ambient.ogg');
         expect(audioInstances[0].loop).toBe(true);
         expect(audioInstances[0].preload).toBe('auto');
-        expect(audioInstances[0].volume).toBe(0.32);
+        expect(audioInstances[0].volume).toBe(0.192);
         expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
     });
 

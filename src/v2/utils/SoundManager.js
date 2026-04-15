@@ -20,7 +20,7 @@ export class SoundManager {
             this.musicEl = new Audio(this.backgroundTrackUrl);
             this.musicEl.loop = true;
             this.musicEl.preload = 'auto';
-            this.musicEl.volume = 0.32;
+            this.musicEl.volume = 0.192;
         }
 
         if (!this.enabled) {
